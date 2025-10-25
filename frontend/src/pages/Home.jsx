@@ -1,7 +1,6 @@
 import React from 'react'
 import Event from '../Components/Event'
 export default function Home() {
-  // Demo event data
   const events = [
     {
       id: 1,
@@ -35,7 +34,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
 
-      {/* Content */}
       <div className="pt-24 px-6 max-w-5xl mx-auto">
         <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
           🗳️ Voting Events

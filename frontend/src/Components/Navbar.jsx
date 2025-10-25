@@ -7,7 +7,6 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Remove token from memory instead of localStorage
     navigate("/login");
   };
 
@@ -18,10 +17,10 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Navbar */}
+
       <nav className="w-full bg-white shadow fixed top-0 left-0 z-20">
         <div className="w-full px-6 py-4 flex justify-between items-center">
-          {/* Logo */}
+
           <h1
             onClick={() => goTo("/dashboard")}
             className="text-2xl font-bold text-blue-600 cursor-pointer"
@@ -29,7 +28,7 @@ export default function Navbar() {
             VoteX
           </h1>
 
-          {/* Desktop Links */}
+
           <div className="hidden md:flex gap-6 items-center">
             <button onClick={() => goTo("/dashboard")} className="hover:text-blue-600">
               Dashboard
@@ -48,14 +47,12 @@ export default function Navbar() {
             </button>
           </div>
 
-          {/* Mobile Menu Button */}
           <button onClick={() => setOpen(!open)} className="md:hidden">
             {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </nav>
 
-      {/* Mobile Menu */}
       {open && (
         <div className="fixed top-16 left-0 right-0 bg-white shadow-lg z-10 md:hidden">
           <div className="flex flex-col p-4 space-y-3">
@@ -78,7 +75,6 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* Overlay */}
       {open && (
         <div
           onClick={() => setOpen(false)}
