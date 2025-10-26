@@ -7,6 +7,10 @@ import Event from './pages/Event'
 import Navbar from './Components/Navbar'
 import Profile from './pages/Profile'
 import Passwordchange from './pages/Passwordchange'
+import Dashboard from './pages/Dashboard'
+import AdminDashboard from './Components/AdminDashboard'
+import VoterDashboard from './Components/VoterDashboard'
+import EventHistory from './pages/EventHistory'
 const App = () => {
   return (
     <div>
@@ -19,6 +23,10 @@ const App = () => {
         <Route path="/event/:id" element={<Event/>}/>
         <Route path="/profile/:id" element={<Profile/>}/>
         <Route path="/change-password/:id" element={<Passwordchange/>}/>
+        <Route path="/dashboard/:id" element={<Dashboard/>}/>
+        <Route path="/dashboard/AdminDashboard/:id" element={<AdminDashboard/>} />
+        <Route path="/dashboard/VoterDashboard/:id" element={<VoterDashboard/>} />
+        <Route path="/eventHistory/:id" element={<EventHistory/>} />
       </Routes>
     </div>
   )
