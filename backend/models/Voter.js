@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose")
 
 const voterSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -13,4 +13,5 @@ const voterSchema = new mongoose.Schema({
 
 }, { timestamps: true }); 
 
-export default mongoose.model("Voter", voterSchema);
+const voter = mongoose.model("Voter", voterSchema);
+module.exports = voter;

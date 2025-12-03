@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require('mongoose')
 
 const voteSchema = new mongoose.Schema({
   event: {
@@ -26,4 +26,5 @@ const voteSchema = new mongoose.Schema({
 
 });
 
-export default mongoose.model("Vote", voteSchema);
+const Vote = mongoose.model("Vote", voteSchema);
+module.exports = Vote

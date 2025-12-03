@@ -3,6 +3,7 @@ dotenv.config();
 
 const express = require('express');
 const cors = require('cors');
+const adminRoutes = require('./routes/adminRoutes.js')
 
 const app = express();
 const PORT = process.env.PORT;
@@ -14,7 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/', (req, res) => {
 	res.json({ status: 'ok', message: 'Voter backend running',type: "Major Project of final year"})
 })
-
+app.use('/api/admin',adminRoutes)
 app.listen(PORT, () => {
 	console.log(`Server listening on port ${PORT}`)
 })
