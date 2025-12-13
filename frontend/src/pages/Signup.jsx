@@ -1,33 +1,27 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 
 export default function Signup() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ username: "", email: "", password: "" });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const { signup, loading, error } = useAuth();
+
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
 
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
-
     try {
-      const res = await fetch("/api/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-
-      if (!res.ok) throw new Error("Signup failed");
-      navigate("/login");
-    } catch (err) {
-      setError(err.message || "An error occurred");
-    } finally {
-      setLoading(false);
+      await signup(form); 
+      navigate("/login"); 
+    } catch {
+      // error already handled in context
     }
   };
 
@@ -35,13 +29,15 @@ export default function Signup() {
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="w-full max-w-sm p-6 bg-white rounded-xl shadow-md">
         <h2 className="text-2xl font-semibold mb-4 text-center">Sign Up</h2>
+
         <form onSubmit={handleSubmit}>
-          <label className="block mb-2 font-medium">Username</label>
+          <label className="block mb-2 font-medium">Name</label>
           <input
-            name="username"
-            value={form.username}
+            name="name"
+            value={form.name}
             onChange={handleChange}
             type="text"
+            required
             className="w-full p-2 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
 
@@ -51,6 +47,7 @@ export default function Signup() {
             value={form.email}
             onChange={handleChange}
             type="email"
+            required
             className="w-full p-2 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
 
@@ -60,6 +57,7 @@ export default function Signup() {
             value={form.password}
             onChange={handleChange}
             type="password"
+            required
             className="w-full p-2 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
 

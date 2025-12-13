@@ -1,35 +1,31 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 
 export default function Login() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const { login, loading, error } = useAuth();
+
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+    role: "voter",
+  });
 
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
-
     try {
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-
-      if (!res.ok) throw new Error("Login failed");
-
-      localStorage.setItem("token", "dummy-auth-token");
-      navigate("/dashboard");
-    } catch (err) {
-      setError(err.message || "An error occurred");
-    } finally {
-      setLoading(false);
+      const user = await login(form);
+      navigate(
+        user.role === "admin"
+          ? "/admin/dashboard"
+          : "/voter/dashboard"
+      );
+    } catch {
+      // error handled in context
     }
   };
 
@@ -37,13 +33,26 @@ export default function Login() {
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="w-full max-w-sm p-6 bg-white rounded-xl shadow-md">
         <h2 className="text-2xl font-semibold mb-4 text-center">Login</h2>
+
         <form onSubmit={handleSubmit}>
+          <label className="block mb-2 font-medium">Login As</label>
+          <select
+            name="role"
+            value={form.role}
+            onChange={handleChange}
+            className="w-full p-2 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="voter">Voter</option>
+            <option value="admin">Admin</option>
+          </select>
+
           <label className="block mb-2 font-medium">Email</label>
           <input
             name="email"
             value={form.email}
             onChange={handleChange}
             type="email"
+            required
             className="w-full p-2 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
 
@@ -53,6 +62,7 @@ export default function Login() {
             value={form.password}
             onChange={handleChange}
             type="password"
+            required
             className="w-full p-2 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
 
@@ -68,7 +78,7 @@ export default function Login() {
         </form>
 
         <p className="text-center text-sm mt-4">
-          Don’t have an account?{" "}
+          Don't have an account?{" "}
           <Link to="/signup" className="text-blue-600 hover:underline">
             Sign up
           </Link>

@@ -1,5 +1,5 @@
-import React from 'react'
 import { Route,Routes } from 'react-router-dom'
+import { AuthProvider } from './context/AuthContext'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
@@ -14,6 +14,7 @@ import EventHistory from './pages/EventHistory'
 const App = () => {
   return (
     <div>
+      <AuthProvider>  
       <Navbar/>
       <Routes> 
         <Route path="/" element={<Home/>}/>
@@ -28,6 +29,7 @@ const App = () => {
         <Route path="/dashboard/VoterDashboard/:id" element={<VoterDashboard/>} />
         <Route path="/eventHistory/:id" element={<EventHistory/>} />
       </Routes>
+      </AuthProvider>
     </div>
   )
 }
