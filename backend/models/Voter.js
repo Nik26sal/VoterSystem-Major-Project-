@@ -6,7 +6,6 @@ const voterSchema = new mongoose.Schema({
   password: { type: String, required: true },
   banned: { type: Boolean, default: false },
   role: { type: String, default: "voter" }
-
 }, { timestamps: true }); 
 
 const voter = mongoose.model("Voter", voterSchema);
