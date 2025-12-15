@@ -7,7 +7,6 @@ const createAdmin = async (req, res) => {
         if (!name || !email || !password) {
             return res.status(400).json({ message: 'Please provide name, email and password' });
         }
-
         const existing = await Admin.findOne({ email });
         if (existing) {
             return res.status(409).json({ message: 'A user with this email already exists' });
@@ -20,13 +19,12 @@ const createAdmin = async (req, res) => {
                 password: hashedPassword
             }
         );
-        if (!admin) {
+        if (!newAdmin) {
             return res.status(500).json({ message: 'Something went wrong. Please try again later.' });
         }
-
         return res.status(201).json({
             message: "Admin created successfully",
-            Admin: {
+            admin: {
                 id: newAdmin._id,
                 name: newAdmin.name,
                 email: newAdmin.email
@@ -38,4 +36,53 @@ const createAdmin = async (req, res) => {
     }
 };
 
-module.exports = { createAdmin }
+const loginAdmin = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Please provide email and password' });
+        }
+        const existing = await Admin.findOne({ email });
+        if (!existing) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        const passwordMatch = await bcrypt.compare(password, existing.password);
+        if (!passwordMatch) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+        return res.status(200).json({
+            message: "User logged in successfully",
+            admin: existing
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
+const logoutAdmin = async (req, res) => {
+    try {
+        res.clearCookie && res.clearCookie('token');
+        return res.status(200).json({ message: 'Logged out successfully' });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
+const deleteAdmin = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const existing = await Admin.findById(id);
+        if (!existing) {
+            return res.status(404).json({ message: "Admin not found" });
+        }
+        const deletedUser = await Admin.findByIdAndDelete(id);
+        if (!deletedUser) {
+            return res.status(500).json({ message: 'Something went wrong during deletion of admin' });
+        }
+        return res.status(200).json({ message: 'Admin deleted successfully' });
+    } catch (error) {
+         console.error(error);
+        return res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
+module.exports = { createAdmin, loginAdmin, logoutAdmin, deleteAdmin }
