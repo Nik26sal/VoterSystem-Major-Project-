@@ -21,8 +21,8 @@ export default function Login() {
       const user = await login(form);
       navigate(
         user.role === "admin"
-          ? "/admin/dashboard"
-          : "/voter/dashboard"
+          ? `/dashboard/AdminDashboard/${user.id}`
+          : `/dashboard/VoterDashboard/${user.id}`
       );
     } catch {
       // error handled in context

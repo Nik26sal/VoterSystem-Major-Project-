@@ -1,20 +1,21 @@
 import React, { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-
-  const user = {
+  const { user } = useAuth();
+  const userData = {
     id: id,
-    role: "admin", //voter or admin
+    role: user.role, //voter or admin
   };
 
   useEffect(() => {
-    if (user.role === "admin") {
-      navigate(`/dashboard/AdminDashboard/${user.id}`);
-    } else if (user.role === "voter") {
-      navigate(`/dashboard/VoterDashboard/${user.id}`);
+    if (userData.role === "admin") {
+      navigate(`/dashboard/AdminDashboard/${userData.id}`);
+    } else if (userData.role === "voter") {
+      navigate(`/dashboard/VoterDashboard/${userData.id}`);
     }
   }, [user.role, user.id, navigate]);
 

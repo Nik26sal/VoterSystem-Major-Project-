@@ -1,5 +1,6 @@
 const Admin = require('../models/Admin.js');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const createAdmin = async (req, res) => {
     try {
@@ -50,9 +51,14 @@ const loginAdmin = async (req, res) => {
         if (!passwordMatch) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
-        return res.status(200).json({
+        const token = jwt.sign({ id: existing._id }, process.env.JWT_SECRET,{ expiresIn: "1d" });
+        res.cookie("token",token,{httpOnly:true,maxAge: 24 * 60 * 60 * 1000,secure: false});
+        res.json({
             message: "User logged in successfully",
-            admin: existing
+            user:{
+                id: existing._id,
+                role: "admin",
+            } 
         });
     } catch (error) {
         console.error(error);
@@ -85,4 +91,20 @@ const deleteAdmin = async (req, res) => {
         return res.status(500).json({ message: 'Internal Server Error' });
     }
 }
-module.exports = { createAdmin, loginAdmin, logoutAdmin, deleteAdmin }
+const profileAdmin = async (req, res) => {
+    try {
+        const { id } = req.params;
+        if(id!==req.user.id){
+            return res.status(403).json({ message: "Access denied" });
+        }
+        const existing = await Admin.findById(id).select('-password');
+        if (!existing) {
+            return res.status(404).json({ message: "Admin not found" });
+        }
+        return res.status(200).json({ user: existing });
+    } catch (error) {
+         console.error(error);
+        return res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
+module.exports = { createAdmin, loginAdmin, logoutAdmin, deleteAdmin, profileAdmin}

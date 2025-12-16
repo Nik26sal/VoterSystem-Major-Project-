@@ -1,20 +1,26 @@
 import { createContext, useEffect, useState } from "react";
-import api from "axios";
+import api from "../api/api";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // useEffect(() => {
+  //   console.log("User updated:", user);
+  // }, [user]);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data } = await api.get("/"); 
+        const { data } = await api.get("/checkAuth");
         setUser(data.user);
-      } catch {
+      } catch (err) {
         setUser(null);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -26,18 +32,15 @@ export const AuthProvider = ({ children }) => {
     setError(null);
 
     try {
-      const { data } = await api.post("/login", {
-        email,
-        password,
-        role,
-      });
+      const { data } = await api.post(
+        `/${role === "voter" ? "voter/loginVoter" : "admin/loginAdmin"}`,
+        { email, password }
+      );
 
       setUser(data.user);
       return data.user;
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Login failed"
-      );
+      setError(err.response?.data?.message || "Login failed");
       throw err;
     } finally {
       setLoading(false);
@@ -49,30 +52,40 @@ export const AuthProvider = ({ children }) => {
     setError(null);
 
     try {
-      const { data } = await api.post("http://localhost:5000/api/voter/createVoter", {
+      const { data } = await api.post("/voter/createVoter", {
         name,
         email,
         password,
       });
-
-      setUser(data.user);
-      return data.user;
+      return data.voter;
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Signup failed"
-      );
+      setError(err.response?.data?.message || "Signup failed");
       throw err;
     } finally {
       setLoading(false);
     }
   };
 
+ 
   const logout = async () => {
     try {
-      await api.post("/logout");
+      if (!user) return;
+
+      await api.post(
+        `/${user.role === "voter" ? "voter/logoutVoter" : "admin/logoutAdmin"}`
+      );
     } finally {
       setUser(null);
     }
+  };
+
+  const profileFetch = async (id) => {
+    const { data } = await api.get(
+      `/${user.role === "voter"
+        ? `voter/profileVoter/${id}`
+        : `admin/profileAdmin/${id}`}`
+    );
+    return data.user;
   };
 
   return (
@@ -85,6 +98,7 @@ export const AuthProvider = ({ children }) => {
         login,
         signup,
         logout,
+        profileFetch,
       }}
     >
       {children}

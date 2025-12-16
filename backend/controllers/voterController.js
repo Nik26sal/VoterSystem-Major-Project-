@@ -1,5 +1,6 @@
 const Voter = require('../models/Voter');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const createVoter = async (req, res) => {
   try {
@@ -50,10 +51,17 @@ const loginVoter = async (req, res) => {
         if (!passwordMatch) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
-        return res.status(200).json({
-            message: "User logged in successfully",
-            admin: existing
-        });
+        const token = jwt.sign({ id: existing._id }, process.env.JWT_SECRET,{ expiresIn: "1d" });
+        res.cookie("token",token,{httpOnly:true,maxAge: 24 * 60 * 60 * 1000,secure: false});
+        res.status(200).json({
+        message: "User logged in successfully",
+        user: {
+          id: existing._id,
+          email: existing.email,
+          role: "voter"
+        }
+      });
+
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: 'Internal Server Error' });
@@ -85,5 +93,20 @@ const deleteVoter = async (req, res) => {
         return res.status(500).json({ message: 'Internal Server Error' });
     }
 }
-
-module.exports = { createVoter ,loginVoter,logoutVoter, deleteVoter};
+const profileVoter = async (req, res) => {
+    try {
+        const { id } = req.params;
+        if(id!==req.user.id){
+            return res.status(403).json({ message: "Access denied" });
+        }
+        const existing = await Voter.findById(id).select('-password');
+        if (!existing) {
+            return res.status(404).json({ message: "Voter not found" });
+        }
+        return res.status(200).json({ user: existing });
+    } catch (error) {
+         console.error(error);
+        return res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
+module.exports = { createVoter ,loginVoter,logoutVoter, deleteVoter, profileVoter};
