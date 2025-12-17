@@ -1,6 +1,8 @@
 const Admin = require('../models/Admin.js');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const verificationCode = require('../OTP_verification/verificationCodeGenerator.js');
+const { sendVerificationEamil } = require('../OTP_verification/email.js');
 
 const createAdmin = async (req, res) => {
     try {
@@ -10,32 +12,58 @@ const createAdmin = async (req, res) => {
         }
         const existing = await Admin.findOne({ email });
         if (existing) {
-            return res.status(409).json({ message: 'A user with this email already exists' });
+            if (!existing.isVerified) {
+                await Admin.findByIdAndDelete(existing._id);
+            } else {
+                return res.status(401).json({ message: "This user already exists." });
+            }
         }
+        const Code = await verificationCode();
+        await sendVerificationEamil(email, Code);
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newAdmin = await Admin.create(
+        await Admin.create(
             {
                 name,
                 email,
-                password: hashedPassword
+                password: hashedPassword,
+                verificationCode: Code
             }
         );
-        if (!newAdmin) {
+
+        const send = await sendVerificationEamil(user.Email, verificationCode)
+        if (!send) {
             return res.status(500).json({ message: 'Something went wrong. Please try again later.' });
         }
         return res.status(201).json({
-            message: "Admin created successfully",
-            admin: {
-                id: newAdmin._id,
-                name: newAdmin.name,
-                email: newAdmin.email
-            }
+            message: `verification code send successfully on the given ${email}`,
         });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: 'Internal Server Error' });
     }
 };
+
+
+const verifyEmail = async (req, res) => {
+    const { code } = req.body
+    try {
+        const user = await Admin.findOne({
+            verificationCode: code,
+        })
+        if (!user) {
+            return res.status(400).json({ message: "Inavlid or Expired Code" })
+        }
+
+        user.isVerified = true;
+        await user.save()
+        await senWelcomeEmail(user.email, user.name)
+        return res.status(200).json({ success: true, message: "Email Verifed Successfully",Admin:user })
+
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({ success: false, message: "internal server error" })
+    }
+}
 
 const loginAdmin = async (req, res) => {
     try {
@@ -51,14 +79,14 @@ const loginAdmin = async (req, res) => {
         if (!passwordMatch) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
-        const token = jwt.sign({ id: existing._id }, process.env.JWT_SECRET,{ expiresIn: "1d" });
-        res.cookie("token",token,{httpOnly:true,maxAge: 24 * 60 * 60 * 1000,secure: false});
+        const token = jwt.sign({ id: existing._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+        res.cookie("token", token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000, secure: false });
         res.json({
             message: "User logged in successfully",
-            user:{
+            user: {
                 id: existing._id,
                 role: "admin",
-            } 
+            }
         });
     } catch (error) {
         console.error(error);
@@ -87,14 +115,14 @@ const deleteAdmin = async (req, res) => {
         }
         return res.status(200).json({ message: 'Admin deleted successfully' });
     } catch (error) {
-         console.error(error);
+        console.error(error);
         return res.status(500).json({ message: 'Internal Server Error' });
     }
 }
 const profileAdmin = async (req, res) => {
     try {
         const { id } = req.params;
-        if(id!==req.user.id){
+        if (id !== req.user.id) {
             return res.status(403).json({ message: "Access denied" });
         }
         const existing = await Admin.findById(id).select('-password');
@@ -103,8 +131,8 @@ const profileAdmin = async (req, res) => {
         }
         return res.status(200).json({ user: existing });
     } catch (error) {
-         console.error(error);
+        console.error(error);
         return res.status(500).json({ message: 'Internal Server Error' });
     }
 }
-module.exports = { createAdmin, loginAdmin, logoutAdmin, deleteAdmin, profileAdmin}
+module.exports = { createAdmin, loginAdmin, logoutAdmin, deleteAdmin, profileAdmin, verifyEmail }

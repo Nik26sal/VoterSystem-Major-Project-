@@ -5,7 +5,9 @@ const voterSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   banned: { type: Boolean, default: false },
-  role: { type: String, default: "voter" }
+  role: { type: String, default: "voter" },
+  verificationCode:{type:Number},
+  isVerified:{type:Boolean,default:false},
 }, { timestamps: true }); 
 
 const voter = mongoose.model("Voter", voterSchema);
