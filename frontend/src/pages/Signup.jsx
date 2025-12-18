@@ -19,7 +19,7 @@ export default function Signup() {
     e.preventDefault();
     try {
       await signup(form); 
-      navigate("/login"); 
+      navigate("/otp_verify"); 
     } catch {
       // error already handled in context
     }

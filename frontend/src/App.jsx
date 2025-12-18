@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard'
 import AdminDashboard from './Components/AdminDashboard'
 import VoterDashboard from './Components/VoterDashboard'
 import EventHistory from './pages/EventHistory'
+import OTP from './pages/OTP'
 const App = () => {
   return (
     <div>
@@ -19,6 +20,7 @@ const App = () => {
       <Routes> 
         <Route path="/" element={<Home/>}/>
         <Route path="/login" element={<Login/>}/>
+        <Route path="/otp_verify" element={<OTP/>}/>
         <Route path="/signup" element={<Signup/>}/>
         <Route path="/signup" element={<Signup/>}/>
         <Route path="/event/:id" element={<Event/>}/>

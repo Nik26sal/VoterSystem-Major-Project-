@@ -8,7 +8,7 @@ const Dashboard = () => {
   const { user } = useAuth();
   const userData = {
     id: id,
-    role: user.role, //voter or admin
+    role: user.role,
   };
 
   useEffect(() => {
