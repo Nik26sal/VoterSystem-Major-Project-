@@ -129,4 +129,14 @@ const profileAdmin = async (req, res) => {
         return res.status(500).json({ message: 'Internal Server Error' });
     }
 }
-module.exports = { createAdmin, loginAdmin, logoutAdmin, deleteAdmin, profileAdmin }
+const createEvent = async (req, res) => {
+    try{
+        console.log(req.body);
+        return res.status(201).json({ message: 'Event created successfully' });
+    }
+    catch(error){
+        console.error(error);
+        return res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
+module.exports = { createAdmin, loginAdmin, logoutAdmin, deleteAdmin, profileAdmin, createEvent }

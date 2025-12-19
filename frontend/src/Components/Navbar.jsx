@@ -89,14 +89,14 @@ export default function Navbar() {
             {user ? (
               <>
                 <button
-                  onClick={() => goTo(`/dashboard/${user.id}`)}
+                  onClick={() => goTo(`/dashboard`)}
                   className="text-left py-2 hover:text-blue-600"
                 >
                   Dashboard
                 </button>
 
                 <button
-                  onClick={() => goTo(`/profile/${user.id}`)}
+                  onClick={() => goTo(`/profile`)}
                   className="text-left py-2 hover:text-blue-600"
                 >
                   Profile
