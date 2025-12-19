@@ -40,7 +40,7 @@ export default function Navbar() {
             {user ? (
               <>
                 <button
-                  onClick={() => navigate(`/dashboard/${user.id}`)}
+                  onClick={() => navigate(`/dashboard`)}
                   className="hover:text-blue-600"
                 >
                   Dashboard

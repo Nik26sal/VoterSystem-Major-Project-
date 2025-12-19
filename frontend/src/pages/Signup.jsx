@@ -18,7 +18,8 @@ export default function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await signup(form); 
+      const response = await signup(form);
+      console.log(response); 
       navigate("/otp_verify"); 
     } catch {
       // error already handled in context

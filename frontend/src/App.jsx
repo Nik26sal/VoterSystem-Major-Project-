@@ -26,9 +26,9 @@ const App = () => {
         <Route path="/event/:id" element={<Event/>}/>
         <Route path="/profile/:id" element={<Profile/>}/>
         <Route path="/change-password/:id" element={<Passwordchange/>}/>
-        <Route path="/dashboard/:id" element={<Dashboard/>}/>
-        <Route path="/dashboard/AdminDashboard/:id" element={<AdminDashboard/>} />
-        <Route path="/dashboard/VoterDashboard/:id" element={<VoterDashboard/>} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard/AdminDashboard" element={<AdminDashboard />} />
+        <Route path="/dashboard/VoterDashboard" element={<VoterDashboard />} />
         <Route path="/eventHistory/:id" element={<EventHistory/>} />
       </Routes>
       </AuthProvider>

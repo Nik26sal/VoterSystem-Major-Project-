@@ -57,7 +57,7 @@ export const AuthProvider = ({ children }) => {
         email,
         password,
       });
-      return data.voter;
+      return data;
     } catch (err) {
       setError(err.response?.data?.message || "Signup failed");
       throw err;
@@ -88,6 +88,12 @@ export const AuthProvider = ({ children }) => {
     return data.user;
   };
 
+  const createEvent = async (eventData) => {
+    console.log("Creating event with data:", eventData);
+    // const { data } = await api.post("/admin/createEvent", eventData);
+    return eventData;
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -99,6 +105,7 @@ export const AuthProvider = ({ children }) => {
         signup,
         logout,
         profileFetch,
+        createEvent,
       }}
     >
       {children}

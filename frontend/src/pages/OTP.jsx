@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../api/api";
+// import axios from "../api/api";
 
 function OTP() {
   const [otp, setOtp] = useState(new Array(6).fill(""));
@@ -44,13 +45,13 @@ function OTP() {
     setLoading(true);
     try {
       const code = otp.join("");
-      const response = await api.post("/api/voter/verifyEmail", {
+      const response = await api.post("/voter/emailverify", {
         code,
       });
-
+      // console.log(response);
       showPopup(response?.data?.message || "Email verified successfully.", "success");
       setTimeout(() => {
-        navigate("/sign_in_up", { state: { isLogin: true, loading: false } });
+        navigate("/login", { state: { isLogin: true, loading: false } });
       }, 2000);
     } catch (err) {
       showPopup("Invalid or expired code. Try again.", "error");
@@ -70,7 +71,7 @@ function OTP() {
   return (
     <div
       onKeyDown={handleKeyDownforsubmit}
-      className="relative w-screen h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-blue-800 to-indigo-900"
+      className="relative w-screen h-screen flex items-center justify-center overflow-hidden bg-linear-to-br from-blue-800 to-indigo-900"
     >
       <motion.div
         initial={{ y: 40, opacity: 0 }}

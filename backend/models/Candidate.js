@@ -2,15 +2,10 @@ const mongoose = require('mongoose')
 
 const candidateSchema = new mongoose.Schema({
   name: { type: String, required: true },
-
-  verificationCode:{
-        type:Number
-    },
-    isVerified:{
-        type:Boolean,
-        default:false
-    },
-
+  email: { type: String, required: true, unique: true },
+  age: { type: Number, required: true },
+  description: { type: String },
+  party: { type: String, required: true },
   events: [
     {
       type: mongoose.Schema.Types.ObjectId,

@@ -1,3 +1,5 @@
-const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()
+const verificationCodeGenerator = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
 
-module.exports = verificationCode;
+module.exports = verificationCodeGenerator;

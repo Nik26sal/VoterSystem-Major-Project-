@@ -6,7 +6,7 @@ const router = express.Router();
 router.post('/createAdmin',createAdmin);
 router.post('/loginAdmin', loginAdmin);
 router.post('/logoutAdmin', logoutAdmin);
-router.post('/emailverify',verifyEmail)
+// router.post('/emailverify',verifyEmail)
 router.delete('/deleteAdmin/:id', deleteAdmin);
 router.get('/profileAdmin/:id',authMiddleware,profileAdmin);
 module.exports = router;

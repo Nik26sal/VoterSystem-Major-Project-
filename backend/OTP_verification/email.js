@@ -10,11 +10,13 @@ const sendVerificationEamil=async(email,verificationCode)=>{
             html: Verification_Email_Template.replace("{verificationCode}",verificationCode)
         })
         console.log('Email send Successfully',response)
+        return true;
     } catch (error) {
         console.log('Email error',error)
+        return false;
     }
 }
-const senWelcomeEmail=async(email,name)=>{
+const sendWelcomeEmail=async(email,name)=>{
     try {
      const response=   await transporter.sendMail({
             from: `${process.env.EMAIL}`,
@@ -23,10 +25,13 @@ const senWelcomeEmail=async(email,name)=>{
             text: "Welcome Email",
             html: Welcome_Email_Template.replace("{name}",name)
         })
-        console.log('Email send Successfully',response)
+        console.log('Email send Successfully for welcome',response)
+        return true;
     } catch (error) {
         console.log('Email error',error)
+        return false;
     }
 }
 
-module.exports = {sendVerificationEamil, senWelcomeEmail};
+
+module.exports = {sendVerificationEamil, sendWelcomeEmail};

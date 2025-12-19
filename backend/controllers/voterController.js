@@ -2,7 +2,7 @@ const Voter = require('../models/Voter');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const verificationCode = require('../OTP_verification/verificationCodeGenerator.js');
-const { sendVerificationEamil } = require('../OTP_verification/email.js');
+const { sendVerificationEamil,sendWelcomeEmail } = require('../OTP_verification/email.js');
 
 const createVoter = async (req, res) => {
   try {
@@ -12,24 +12,24 @@ const createVoter = async (req, res) => {
     }
 
     const existingVoter = await Voter.findOne({ email });
-    if (existing) {
+    if (existingVoter) {
       if (!existing.isVerified) {
         await Voter.findByIdAndDelete(existing._id);
       } else {
         return res.status(401).json({ message: "This user already exists." });
       }
     }
-    const Code = await verificationCode();
-    await sendVerificationEamil(email, Code);
+    const Code = verificationCode();
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await Voter.create({
       name,
       email,
-      password: hashedPassword
+      password: hashedPassword,
+      verificationCode: Code,
     });
 
-    const send = await sendVerificationEamil(user.Email, verificationCode)
+    const send = await sendVerificationEamil(email, Code);
     if (!send) {
       return res.status(500).json({ message: 'Something went wrong. Please try again later.' });
     }
@@ -49,13 +49,13 @@ const verifyEmail = async (req, res) => {
       verificationCode: code,
     })
     if (!user) {
-      return res.status(400).json({ message: "Inavlid or Expired Code" })
+      return res.status(400).json({ message: "Invalid or Expired Code" })
     }
 
     user.isVerified = true;
     await user.save()
-    await senWelcomeEmail(user.email, user.name)
-    return res.status(200).json({ success: true, message: "Email Verifed Successfully", Admin: user })
+    await sendWelcomeEmail(user.email, user.name)
+    return res.status(200).json({ success: true, message: "Email Verifed Successfully"})
 
   } catch (error) {
     console.log(error)

@@ -1,8 +1,8 @@
 const Admin = require('../models/Admin.js');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const verificationCode = require('../OTP_verification/verificationCodeGenerator.js');
-const { sendVerificationEamil } = require('../OTP_verification/email.js');
+// const verificationCode = require('../OTP_verification/verificationCodeGenerator.js');
+// const { sendVerificationEamil,sendWelcomeEmail } = require('../OTP_verification/email.js');
 
 const createAdmin = async (req, res) => {
     try {
@@ -12,30 +12,24 @@ const createAdmin = async (req, res) => {
         }
         const existing = await Admin.findOne({ email });
         if (existing) {
-            if (!existing.isVerified) {
-                await Admin.findByIdAndDelete(existing._id);
-            } else {
-                return res.status(401).json({ message: "This user already exists." });
-            }
+            return res.status(401).json({ message: "This user already exists." });
         }
-        const Code = await verificationCode();
-        await sendVerificationEamil(email, Code);
+        // const Code = verificationCode();
         const hashedPassword = await bcrypt.hash(password, 10);
         await Admin.create(
             {
                 name,
                 email,
                 password: hashedPassword,
-                verificationCode: Code
             }
         );
 
-        const send = await sendVerificationEamil(user.Email, verificationCode)
-        if (!send) {
-            return res.status(500).json({ message: 'Something went wrong. Please try again later.' });
-        }
+        // const send = await sendVerificationEamil(email, Code);
+        // if (!send) {
+        //     return res.status(500).json({ message: 'Something went wrong. Please try again later.' });
+        // }
         return res.status(201).json({
-            message: `verification code send successfully on the given ${email}`,
+            message: `Admin created successfully`,
         });
     } catch (error) {
         console.error(error);
@@ -44,26 +38,26 @@ const createAdmin = async (req, res) => {
 };
 
 
-const verifyEmail = async (req, res) => {
-    const { code } = req.body
-    try {
-        const user = await Admin.findOne({
-            verificationCode: code,
-        })
-        if (!user) {
-            return res.status(400).json({ message: "Inavlid or Expired Code" })
-        }
+// const verifyEmail = async (req, res) => {
+//     const { code } = req.body
+//     try {
+//         const user = await Admin.findOne({
+//             verificationCode: code,
+//         })
+//         if (!user) {
+//             return res.status(400).json({ message: "Inavlid or Expired Code" })
+//         }
 
-        user.isVerified = true;
-        await user.save()
-        await senWelcomeEmail(user.email, user.name)
-        return res.status(200).json({ success: true, message: "Email Verifed Successfully",Admin:user })
+//         user.isVerified = true;
+//         await user.save()
+//         await sendWelcomeEmail(user.email, user.name)
+//         return res.status(200).json({ success: true, message: "Email Verifed Successfully",Admin:user })
 
-    } catch (error) {
-        console.log(error)
-        return res.status(400).json({ success: false, message: "internal server error" })
-    }
-}
+//     } catch (error) {
+//         console.log(error)
+//         return res.status(400).json({ success: false, message: "internal server error" })
+//     }
+// }
 
 const loginAdmin = async (req, res) => {
     try {
@@ -135,4 +129,4 @@ const profileAdmin = async (req, res) => {
         return res.status(500).json({ message: 'Internal Server Error' });
     }
 }
-module.exports = { createAdmin, loginAdmin, logoutAdmin, deleteAdmin, profileAdmin, verifyEmail }
+module.exports = { createAdmin, loginAdmin, logoutAdmin, deleteAdmin, profileAdmin }
