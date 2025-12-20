@@ -7,10 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // useEffect(() => {
-  //   console.log("User updated:", user);
-  // }, [user]);
+  // const [allEventsData, setAllEventsData] = useState([]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -23,7 +20,6 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
       }
     };
-
     checkAuth();
   }, []);
 
@@ -65,12 +61,10 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   };
-
  
   const logout = async () => {
     try {
       if (!user) return;
-
       await api.post(
         `/${user.role === "voter" ? "voter/logoutVoter" : "admin/logoutAdmin"}`
       );
@@ -88,19 +82,24 @@ export const AuthProvider = ({ children }) => {
     return data.user;
   };
 
-  const createCandidate = async (candidate) => {
-  const data = await api.post("/candidate/createCandidate", {
-    candidate
-  });
-  return data;
-};
-
+//   const createCandidate = async (candidate) => {
+//   const data = await api.post("/candidate/createCandidate", {
+//     candidate
+//   });
+//   return data;
+// };
 
   const createEvent = async (eventData) => {
     console.log("Creating event with data:", eventData);
     const { data } = await api.post("/admin/createEvent", eventData);
     return data;
   };
+
+  const allEvents = async () => {
+    const { data } = await api.get("/event/allEvents");
+    // setAllEventsData(data.events);
+    return data.events;
+  }
 
   return (
     <AuthContext.Provider
@@ -114,7 +113,8 @@ export const AuthProvider = ({ children }) => {
         logout,
         profileFetch,
         createEvent,
-        createCandidate
+        allEvents,
+        // createCandidate
       }}
     >
       {children}

@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Calendar, PlusCircle, History } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const { user, createEvent, createCandidate } = useAuth();
+  const { user, createEvent } = useAuth();
 
   const [view, setView] = useState("main");
   const [events, setEvents] = useState([]);
+
   /* ================= EVENT STATE ================= */
   const [newEvent, setNewEvent] = useState({
     title: "",
@@ -26,32 +27,39 @@ export default function AdminDashboard() {
     name: "",
     email: "",
     age: "",
-    party: "",
+    partyName: "",
     description: "",
   });
 
   /* ================= ADD CANDIDATE ================= */
-  const handleAddCandidate = async () => {
-    const { name, email, age, party } = candidate;
+  const handleAddCandidate = () => {
+    const { name, email, age, partyName } = candidate;
 
-    if (!name || !email || !age || !party) {
+    if (!name || !email || !age || !partyName) {
       alert("Name, Email, Age and Party Name are required");
       return;
     }
-    const data = await createCandidate(candidate);
-      setNewEvent((prev) => ({
-        ...prev,
-        candidates: [...prev.candidates, data.data.candidate],
-      }));
 
-      setCandidate({
-        name: "",
-        email: "",
-        age: "",
-        party: "",
-        description: "",
-      });
-      alert("User Added successfully. Add More User")
+    setNewEvent((prev) => ({
+      ...prev,
+      candidates: [...prev.candidates, candidate],
+    }));
+
+    setCandidate({
+      name: "",
+      email: "",
+      age: "",
+      partyName: "",
+      description: "",
+    });
+  };
+
+  /* ================= REMOVE CANDIDATE ================= */
+  const handleRemoveCandidate = (index) => {
+    setNewEvent((prev) => ({
+      ...prev,
+      candidates: prev.candidates.filter((_, i) => i !== index),
+    }));
   };
 
   /* ================= CREATE EVENT ================= */
@@ -76,7 +84,7 @@ export default function AdminDashboard() {
         .map((v) => v.trim())
         .filter(Boolean),
       candidates: newEvent.candidates,
-      createdBy: user.id,
+      createdBy: user.id, // ADMIN ID
     };
 
     try {
@@ -192,7 +200,7 @@ export default function AdminDashboard() {
               </div>
 
               <textarea
-                placeholder="Allowed Emails (comma separated) , if all are allowed then leave empty"
+                placeholder="Allowed Emails (comma separated)"
                 className="w-full p-3 border rounded-lg"
                 value={newEvent.allowedEmails}
                 onChange={(e) =>
@@ -248,11 +256,11 @@ export default function AdminDashboard() {
                   <input
                     placeholder="Party Name"
                     className="p-3 border rounded-lg"
-                    value={candidate.party}
+                    value={candidate.partyName}
                     onChange={(e) =>
                       setCandidate({
                         ...candidate,
-                        party: e.target.value,
+                        partyName: e.target.value,
                       })
                     }
                   />
@@ -276,6 +284,40 @@ export default function AdminDashboard() {
                 >
                   Add Candidate
                 </button>
+
+                {/* ===== ADDED CANDIDATES LIST ===== */}
+                {newEvent.candidates.length > 0 && (
+                  <div className="mt-4 space-y-3">
+                    {newEvent.candidates.map((c, index) => (
+                      <div
+                        key={index}
+                        className="flex justify-between bg-white border rounded-lg p-3"
+                      >
+                        <div>
+                          <p className="font-semibold">
+                            {c.name} ({c.age})
+                          </p>
+                          <p className="text-sm">{c.email}</p>
+                          <p className="text-sm text-gray-600">
+                            Party: {c.partyName}
+                          </p>
+                          {c.description && (
+                            <p className="text-sm text-gray-500">
+                              {c.description}
+                            </p>
+                          )}
+                        </div>
+
+                        <button
+                          onClick={() => handleRemoveCandidate(index)}
+                          className="text-red-600 hover:text-red-800 font-medium"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-4">

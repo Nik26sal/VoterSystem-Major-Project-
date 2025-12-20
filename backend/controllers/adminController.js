@@ -1,6 +1,8 @@
 const Admin = require('../models/Admin.js');
-const Voter = require('../models/Voter.js')
+// const Voter = require('../models/Voter.js')
 const Event = require("../models/Event");
+const Candidate = require("../models/Candidate");
+const { createCandidate } = require('./candidateController.js');
 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -160,30 +162,41 @@ const createEvent = async (req, res) => {
         message: "startAt must be before endAt"
       });
     }
+    
     const now = new Date();
     let status = "upcoming";
-
+    
     if (now >= startDate && now <= endDate) {
-      status = "ongoing";
+        status = "ongoing";
     } else if (now > endDate) {
-      status = "closed";
+        status = "closed";
     }
-    const event = new Event({
+    const candidateDocs = await Promise.all(
+      candidates.map(async (candidate) => {
+        return await createCandidate(candidate);
+      })
+    );
+    const candidateIds = candidateDocs.map((c) => c._id);
+    const newEvent = Event.create({
       title,
       subtitle,
       description,
       startAt: startDate,
       endAt: endDate,
       status,
-      candidates: candidates || [],
+      candidates: candidateIds,
       allowedEmails: allowedEmails || [],
       whitelistVoters: whitelistVoters || [],
       createdBy
     });
-    const savedEvent = await event.save();
+    await Candidate.updateMany(
+      { _id: { $in: candidateIds } },
+      { $set: { event: newEvent._id } }
+    );
+    // const savedEvent = await event.save();
     return res.status(201).json({
       message: "Event created successfully",
-      event: savedEvent
+      event: newEvent
     });
 
   } catch (error) {

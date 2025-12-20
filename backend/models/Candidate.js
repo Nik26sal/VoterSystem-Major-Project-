@@ -5,7 +5,7 @@ const candidateSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   age: { type: Number, required: true },
   description: { type: String },
-  party: { type: String, required: true },
+  partyName: { type: String, required: true },
 }, { timestamps: true });
 
 const Candidate = mongoose.model("Candidate", candidateSchema);
