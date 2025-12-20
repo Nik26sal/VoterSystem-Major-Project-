@@ -1,5 +1,7 @@
 const Admin = require('../models/Admin.js');
 const Voter = require('../models/Voter.js')
+const Event = require("../models/Event");
+
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 // const verificationCode = require('../OTP_verification/verificationCodeGenerator.js');
@@ -131,31 +133,65 @@ const profileAdmin = async (req, res) => {
     }
 }
 
-const checkValidCandidate = async (req, res) => {
-    try {
-        const { email, name } = req.body;
-        const voter = await Voter.findOne({ email });
-        console.log(voter)
-        const exists = !!voter && voter.name === name;
-
-        return res.status(200).json({
-            exists,
-            message: exists ? "A valid user" : "Not a valid user."
-        });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: "Internal Server Error" });
-    }
-};
 
 const createEvent = async (req, res) => {
-    try {
-        console.log(req.body);
-        return res.status(201).json({ message: 'Event created successfully' });
+  try {
+    const {
+      title,
+      subtitle,
+      description,
+      startAt,
+      endAt,
+      allowedEmails,
+      whitelistVoters,
+      candidates,
+      createdBy
+    } = req.body;
+    if (!title || !startAt || !endAt || !createdBy) {
+      return res.status(400).json({
+        message: "Title, startAt, endAt and createdBy are required"
+      });
     }
-    catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'Internal Server Error' });
+    const startDate = new Date(startAt);
+    const endDate = new Date(endAt);
+
+    if (startDate >= endDate) {
+      return res.status(400).json({
+        message: "startAt must be before endAt"
+      });
     }
-}
-module.exports = { createAdmin, loginAdmin, logoutAdmin, deleteAdmin, profileAdmin, createEvent, checkValidCandidate }
+    const now = new Date();
+    let status = "upcoming";
+
+    if (now >= startDate && now <= endDate) {
+      status = "ongoing";
+    } else if (now > endDate) {
+      status = "closed";
+    }
+    const event = new Event({
+      title,
+      subtitle,
+      description,
+      startAt: startDate,
+      endAt: endDate,
+      status,
+      candidates: candidates || [],
+      allowedEmails: allowedEmails || [],
+      whitelistVoters: whitelistVoters || [],
+      createdBy
+    });
+    const savedEvent = await event.save();
+    return res.status(201).json({
+      message: "Event created successfully",
+      event: savedEvent
+    });
+
+  } catch (error) {
+    console.error("Create Event Error:", error);
+    return res.status(500).json({
+      message: "Internal Server Error"
+    });
+  }
+};
+
+module.exports = { createAdmin, loginAdmin, logoutAdmin, deleteAdmin, profileAdmin, createEvent}
