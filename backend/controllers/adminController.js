@@ -1,4 +1,5 @@
 const Admin = require('../models/Admin.js');
+const Voter = require('../models/Voter.js')
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 // const verificationCode = require('../OTP_verification/verificationCodeGenerator.js');
@@ -129,14 +130,32 @@ const profileAdmin = async (req, res) => {
         return res.status(500).json({ message: 'Internal Server Error' });
     }
 }
+
+const checkValidCandidate = async (req, res) => {
+    try {
+        const { email, name } = req.body;
+        const voter = await Voter.findOne({ email });
+        console.log(voter)
+        const exists = !!voter && voter.name === name;
+
+        return res.status(200).json({
+            exists,
+            message: exists ? "A valid user" : "Not a valid user."
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
 const createEvent = async (req, res) => {
-    try{
+    try {
         console.log(req.body);
         return res.status(201).json({ message: 'Event created successfully' });
     }
-    catch(error){
+    catch (error) {
         console.error(error);
         return res.status(500).json({ message: 'Internal Server Error' });
     }
 }
-module.exports = { createAdmin, loginAdmin, logoutAdmin, deleteAdmin, profileAdmin, createEvent }
+module.exports = { createAdmin, loginAdmin, logoutAdmin, deleteAdmin, profileAdmin, createEvent, checkValidCandidate }
