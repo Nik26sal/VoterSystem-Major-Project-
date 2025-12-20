@@ -5,7 +5,7 @@ import useAuth from "../hooks/useAuth";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const { user, createEvent } = useAuth();
+  const { user, createEvent, checkCandidate } = useAuth();
 
   const [view, setView] = useState("main");
   const [events, setEvents] = useState([]);
@@ -31,26 +31,31 @@ export default function AdminDashboard() {
   });
 
   /* ================= ADD CANDIDATE ================= */
-  const handleAddCandidate = () => {
+  const handleAddCandidate = async () => {
     const { name, email, age, partyName } = candidate;
 
     if (!name || !email || !age || !partyName) {
       alert("Name, Email, Age and Party Name are required");
       return;
     }
+    const data = await checkCandidate(email, name);
+    if (data) {
+      setNewEvent((prev) => ({
+        ...prev,
+        candidates: [...prev.candidates, candidate],
+      }));
 
-    setNewEvent((prev) => ({
-      ...prev,
-      candidates: [...prev.candidates, candidate],
-    }));
-
-    setCandidate({
-      name: "",
-      email: "",
-      age: "",
-      partyName: "",
-      description: "",
-    });
+      setCandidate({
+        name: "",
+        email: "",
+        age: "",
+        partyName: "",
+        description: "",
+      });
+      alert("User Added successfully. Add More User")
+    } else {
+      alert("Please proviode a valid email or User")
+    }
   };
 
   /* ================= CREATE EVENT ================= */

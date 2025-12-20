@@ -88,11 +88,21 @@ export const AuthProvider = ({ children }) => {
     return data.user;
   };
 
+  const checkCandidate = async (email, name) => {
+  const data = await api.post("/admin/checkCandidate", {
+    email,
+    name,
+  });
+  console.log(data)
+  return data.data.exists === true;
+};
+
+
   const createEvent = async (eventData) => {
     console.log("Creating event with data:", eventData);
     const { data } = await api.post("/admin/createEvent", eventData);
     return data;
-  }
+  };
 
   return (
     <AuthContext.Provider
@@ -106,6 +116,7 @@ export const AuthProvider = ({ children }) => {
         logout,
         profileFetch,
         createEvent,
+        checkCandidate
       }}
     >
       {children}
