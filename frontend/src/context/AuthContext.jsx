@@ -88,13 +88,11 @@ export const AuthProvider = ({ children }) => {
     return data.user;
   };
 
-  const checkCandidate = async (email, name) => {
-  const data = await api.post("/admin/checkCandidate", {
-    email,
-    name,
+  const createCandidate = async (candidate) => {
+  const data = await api.post("/candidate/createCandidate", {
+    candidate
   });
-  console.log(data)
-  return data.data.exists === true;
+  return data;
 };
 
 
@@ -116,7 +114,7 @@ export const AuthProvider = ({ children }) => {
         logout,
         profileFetch,
         createEvent,
-        checkCandidate
+        createCandidate
       }}
     >
       {children}

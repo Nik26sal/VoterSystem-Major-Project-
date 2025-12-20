@@ -5,7 +5,7 @@ import useAuth from "../hooks/useAuth";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const { user, createEvent, checkCandidate } = useAuth();
+  const { user, createEvent, createCandidate } = useAuth();
 
   const [view, setView] = useState("main");
   const [events, setEvents] = useState([]);
@@ -26,36 +26,32 @@ export default function AdminDashboard() {
     name: "",
     email: "",
     age: "",
-    partyName: "",
+    party: "",
     description: "",
   });
 
   /* ================= ADD CANDIDATE ================= */
   const handleAddCandidate = async () => {
-    const { name, email, age, partyName } = candidate;
+    const { name, email, age, party } = candidate;
 
-    if (!name || !email || !age || !partyName) {
+    if (!name || !email || !age || !party) {
       alert("Name, Email, Age and Party Name are required");
       return;
     }
-    const data = await checkCandidate(email, name);
-    if (data) {
+    const data = await createCandidate(candidate);
       setNewEvent((prev) => ({
         ...prev,
-        candidates: [...prev.candidates, candidate],
+        candidates: [...prev.candidates, data.data.candidate],
       }));
 
       setCandidate({
         name: "",
         email: "",
         age: "",
-        partyName: "",
+        party: "",
         description: "",
       });
       alert("User Added successfully. Add More User")
-    } else {
-      alert("Please proviode a valid email or User")
-    }
   };
 
   /* ================= CREATE EVENT ================= */
@@ -252,11 +248,11 @@ export default function AdminDashboard() {
                   <input
                     placeholder="Party Name"
                     className="p-3 border rounded-lg"
-                    value={candidate.partyName}
+                    value={candidate.party}
                     onChange={(e) =>
                       setCandidate({
                         ...candidate,
-                        partyName: e.target.value,
+                        party: e.target.value,
                       })
                     }
                   />
