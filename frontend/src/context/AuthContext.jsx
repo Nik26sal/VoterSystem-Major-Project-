@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   };
- 
+
   const logout = async () => {
     try {
       if (!user) return;
@@ -84,12 +84,12 @@ export const AuthProvider = ({ children }) => {
     return data.user;
   };
 
-//   const createCandidate = async (candidate) => {
-//   const data = await api.post("/candidate/createCandidate", {
-//     candidate
-//   });
-//   return data;
-// };
+  //   const createCandidate = async (candidate) => {
+  //   const data = await api.post("/candidate/createCandidate", {
+  //     candidate
+  //   });
+  //   return data;
+  // };
 
   const createEvent = async (eventData) => {
     console.log("Creating event with data:", eventData);
@@ -122,6 +122,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const changePassword = async (currentPassword, newPassword) => {
+    try {
+      const role = (user.role === 'admin')?'Admin':'Voter';
+      const res = await api.put(`/${role}/changePassword`,{
+        oldPassword:currentPassword,
+        newPassword
+      })
+      return res;
+    } catch (error) {
+      console.log(error);
+      return error;
+    }
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -138,6 +152,7 @@ export const AuthProvider = ({ children }) => {
         adminEvents,
         adminEventsLoading,
         getAdminEvents,
+        changePassword,
         // createCandidate
       }}
     >

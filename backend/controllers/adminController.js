@@ -217,5 +217,33 @@ const onlyAdminEvents = async (req, res) => {
     }
 };      
 
+const changePassword = async(req, res) => {
+  try {
+    const adminId = req.user.id;
+    const { oldPassword, newPassword} = req.body;
 
-module.exports = { createAdmin, loginAdmin, logoutAdmin, deleteAdmin, profileAdmin, createEvent, onlyAdminEvents };
+    if (!oldPassword || !newPassword ){
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const admin = await Admin.findById(adminId);
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+    const isMatch = await bcrypt.compare(oldPassword, admin.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Old password is incorrect" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    admin.password = await bcrypt.hash(newPassword, salt);
+    await admin.save();
+    return res.status(200).json({ message: "Password changed successfully" });
+
+  } catch (error) {
+    console.error("Change Admin Password Error:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+module.exports = { createAdmin, loginAdmin, logoutAdmin, deleteAdmin, profileAdmin, createEvent, onlyAdminEvents, changePassword};

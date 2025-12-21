@@ -134,4 +134,34 @@ const profileVoter = async (req, res) => {
     return res.status(500).json({ message: 'Internal Server Error' });
   }
 }
-module.exports = { createVoter, loginVoter, logoutVoter, deleteVoter, profileVoter,verifyEmail };
+
+const changePassword = async(req, res) => {
+  try {
+    const voterId = req.user.id;
+    const { oldPassword, newPassword} = req.body;
+
+    if (!oldPassword || !newPassword ){
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const voter = await Voter.findById(voterId);
+    if (!voter) {
+      return res.status(404).json({ message: "Voter not found" });
+    }
+    const isMatch = await bcrypt.compare(oldPassword, voter.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Old password is incorrect" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    voter.password = await bcrypt.hash(newPassword, salt);
+    await voter.save();
+    return res.status(200).json({ message: "Password changed successfully" });
+
+  } catch (error) {
+    console.error("Change Voter Password Error:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+module.exports = { createVoter, loginVoter, logoutVoter, deleteVoter, profileVoter,verifyEmail,changePassword };

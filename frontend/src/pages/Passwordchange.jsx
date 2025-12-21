@@ -1,13 +1,14 @@
 import React, { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate} from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 
 export default function Passwordchange() {
   const navigate = useNavigate();
-  const { id } = useParams(); 
   const [form, setForm] = useState({ currentPassword: "", newPassword: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const {changePassword} = useAuth();
 
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -17,15 +18,9 @@ export default function Passwordchange() {
     setError("");
     setSuccess("");
     setLoading(true);
-
     try {
-      const res = await fetch(`/api/users/${id}/change-password`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-
-      if (!res.ok) throw new Error("Failed to change password");
+     const res = await changePassword(form.currentPassword, form.newPassword)
+      if (!res.statusText === "OK") throw new Error("Failed to change password");
 
       setSuccess("Password updated successfully!");
       setTimeout(() => navigate("/login"), 1500);
