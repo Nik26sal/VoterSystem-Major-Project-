@@ -1,58 +1,104 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import api from "../api/api";
 
 const Event = () => {
-  const events = [
-    {
-      id: 1,
-      title: "Student Council Election 2025",
-      subheading: "Vote for your next student council representatives.",
-      date: "Oct 22 - Oct 30, 2025",
-      status: "Ongoing",
-      description: "This election is to select the best student council representative for this year. Choose wisely and cast your vote for your preferred candidate.",
-      candidates: ["Alice Johnson", "Bob Smith", "Charlie Davis"],
-
-    },
-    {
-      id: 2,
-      title: "TechFest Innovation Awards",
-      subheading: "Choose the most innovative project of the year.",
-      date: "Oct 20 - Oct 25, 2025",
-      status: "Ongoing",
-      description: "This election is to select the best student council representative for this year. Choose wisely and cast your vote for your preferred candidate.",
-      candidates: ["David Lee", "Eva Martinez", "Frank Wilson"]
-    },
-    {
-      id: 3,
-      title: "Photography Contest",
-      subheading: "Vote for the best capture among 20+ talented photographers.",
-      date: "Oct 18 - Oct 24, 2025",
-      description: "This election is to select the best student council representative for this year. Choose wisely and cast your vote for your preferred candidate.",
-      status: "Closed",
-    },
-  ];
   const { id } = useParams();
-  const event = events.find((e) => e.id === parseInt(id));
-  const handleVote = (candidate) => {
-    alert(`You voted for ${candidate} in ${event.title}`);
+  const [event, setEvent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  /* ================= FETCH EVENT ================= */
+  useEffect(() => {
+    const fetchEvent = async () => {
+      try {
+        const res = await api.get(`/event/${id}`);
+        setEvent(res.data.event); 
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load event");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvent();
+  }, [id]);
+
+  /* ================= VOTE HANDLER ================= */
+  const handleVote = (candidateId) => {
+    alert(`You voted for candidate ID: ${candidateId}`);
   };
 
+  /* ================= UI STATES ================= */
+  if (loading) {
+    return (
+      <div className="pt-24 text-center text-gray-500">
+        Loading event...
+      </div>
+    );
+  }
+
+  if (error || !event) {
+    return (
+      <div className="pt-24 text-center text-red-500">
+        {error || "Event not found"}
+      </div>
+    );
+  }
+
+  /* ================= UI ================= */
   return (
     <div className="max-w-3xl mx-auto p-6 pt-20">
-      <h1 className="text-3xl font-bold text-blue-600 mb-2">{event.title}</h1>
-      <h2 className="text-xl font-medium text-gray-700 mb-4">{event.subheading}</h2>
-      <p className="text-gray-600 mb-6">{event.description}</p>
+      <h1 className="text-3xl font-bold text-blue-600 mb-2">
+        {event.title}
+      </h1>
 
+      <h2 className="text-xl font-medium text-gray-700 mb-4">
+        {event.subtitle}
+      </h2>
+
+      <p className="text-gray-600 mb-4">{event.description}</p>
+
+      <p className="text-sm text-gray-500 mb-6">
+        📅 {new Date(event.startAt).toLocaleString()} →{" "}
+        {new Date(event.endAt).toLocaleString()}
+      </p>
+
+      <span
+        className={`inline-block mb-6 px-4 py-1 rounded-full text-sm font-medium ${
+          event.status === "ongoing"
+            ? "bg-green-100 text-green-700"
+            : "bg-gray-200 text-gray-600"
+        }`}
+      >
+        {event.status}
+      </span>
+
+      {/* ================= CANDIDATES ================= */}
       <div className="space-y-4">
-        {event.candidates.map((candidate, idx) => (
+        {event.candidates.map((candidate) => (
           <div
-            key={idx}
+            key={candidate._id}
             className="flex justify-between items-center bg-white rounded-lg shadow p-4 border"
           >
-            <span className="text-gray-800 font-medium">{candidate}</span>
+            <div>
+              <p className="text-gray-800 font-semibold">
+                {candidate.name}
+              </p>
+              <p className="text-sm text-gray-500">
+                Party: {candidate.party || candidate.partyName}
+              </p>
+            </div>
+
             <button
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-              onClick={() => handleVote(candidate)}
+              disabled={event.status !== "ongoing"}
+              onClick={() => handleVote(candidate._id)}
+              className={`px-4 py-2 rounded-md text-white ${
+                event.status === "ongoing"
+                  ? "bg-blue-600 hover:bg-blue-700"
+                  : "bg-gray-400 cursor-not-allowed"
+              }`}
             >
               Vote
             </button>

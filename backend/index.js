@@ -13,6 +13,7 @@ const cookieParser = require('cookie-parser');
 const authMiddleware = require('./middleware/auth');
 const Voter = require('./models/Voter.js');
 const Admin = require('./models/Admin.js');
+const updateEventStatuses = require("./utils/updateEventStatus");
 
 app.use(cookieParser());
 app.use(cors({origin: "http://localhost:5173",credentials: true}));
@@ -20,6 +21,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 database();
+setInterval(() => {
+  updateEventStatuses();
+}, 60 * 1000);
 app.get('/', (req, res) => {
 	res.json({ status: 'ok', message: 'Voter backend running',type: "Major Project of final year"})
 })

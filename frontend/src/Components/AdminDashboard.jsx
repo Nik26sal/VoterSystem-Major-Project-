@@ -1,14 +1,19 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Calendar, PlusCircle, History } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 
 export default function AdminDashboard() {
-  const navigate = useNavigate();
-  const { user, createEvent } = useAuth();
+  const { user, createEvent, adminEvents, adminEventsLoading, getAdminEvents } =
+    useAuth();
 
   const [view, setView] = useState("main");
-  const [events, setEvents] = useState([]);
+
+  /* ================= FETCH ADMIN EVENTS ================= */
+  useEffect(() => {
+    if (user?.id) {
+      getAdminEvents(user.id);
+    }
+  }, [user?.id]);
 
   /* ================= EVENT STATE ================= */
   const [newEvent, setNewEvent] = useState({
@@ -84,13 +89,12 @@ export default function AdminDashboard() {
         .map((v) => v.trim())
         .filter(Boolean),
       candidates: newEvent.candidates,
-      createdBy: user.id, // ADMIN ID
+      createdBy: user.id,
     };
 
     try {
       await createEvent(data);
-
-      setEvents((prev) => [...prev, data]);
+      await getAdminEvents(user.id);
 
       setNewEvent({
         title: "",
@@ -126,7 +130,9 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Total Events</p>
-                  <p className="text-2xl font-semibold">{events.length}</p>
+                  <p className="text-2xl font-semibold">
+                    {adminEventsLoading ? "..." : adminEvents.length}
+                  </p>
                 </div>
               </div>
 
@@ -199,27 +205,6 @@ export default function AdminDashboard() {
                 />
               </div>
 
-              <textarea
-                placeholder="Allowed Emails (comma separated)"
-                className="w-full p-3 border rounded-lg"
-                value={newEvent.allowedEmails}
-                onChange={(e) =>
-                  setNewEvent({ ...newEvent, allowedEmails: e.target.value })
-                }
-              />
-
-              <textarea
-                placeholder="Whitelist Voters (comma separated)"
-                className="w-full p-3 border rounded-lg"
-                value={newEvent.whitelistVoters}
-                onChange={(e) =>
-                  setNewEvent({
-                    ...newEvent,
-                    whitelistVoters: e.target.value,
-                  })
-                }
-              />
-
               {/* ================= CANDIDATES ================= */}
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h3 className="font-semibold mb-3">Add Candidates</h3>
@@ -233,7 +218,6 @@ export default function AdminDashboard() {
                       setCandidate({ ...candidate, name: e.target.value })
                     }
                   />
-
                   <input
                     placeholder="Email"
                     className="p-3 border rounded-lg"
@@ -242,7 +226,6 @@ export default function AdminDashboard() {
                       setCandidate({ ...candidate, email: e.target.value })
                     }
                   />
-
                   <input
                     type="number"
                     placeholder="Age"
@@ -252,28 +235,12 @@ export default function AdminDashboard() {
                       setCandidate({ ...candidate, age: e.target.value })
                     }
                   />
-
                   <input
                     placeholder="Party Name"
                     className="p-3 border rounded-lg"
                     value={candidate.partyName}
                     onChange={(e) =>
-                      setCandidate({
-                        ...candidate,
-                        partyName: e.target.value,
-                      })
-                    }
-                  />
-
-                  <input
-                    placeholder="Description"
-                    className="p-3 border rounded-lg md:col-span-2"
-                    value={candidate.description}
-                    onChange={(e) =>
-                      setCandidate({
-                        ...candidate,
-                        description: e.target.value,
-                      })
+                      setCandidate({ ...candidate, partyName: e.target.value })
                     }
                   />
                 </div>
@@ -285,39 +252,22 @@ export default function AdminDashboard() {
                   Add Candidate
                 </button>
 
-                {/* ===== ADDED CANDIDATES LIST ===== */}
-                {newEvent.candidates.length > 0 && (
-                  <div className="mt-4 space-y-3">
-                    {newEvent.candidates.map((c, index) => (
-                      <div
-                        key={index}
-                        className="flex justify-between bg-white border rounded-lg p-3"
-                      >
-                        <div>
-                          <p className="font-semibold">
-                            {c.name} ({c.age})
-                          </p>
-                          <p className="text-sm">{c.email}</p>
-                          <p className="text-sm text-gray-600">
-                            Party: {c.partyName}
-                          </p>
-                          {c.description && (
-                            <p className="text-sm text-gray-500">
-                              {c.description}
-                            </p>
-                          )}
-                        </div>
-
-                        <button
-                          onClick={() => handleRemoveCandidate(index)}
-                          className="text-red-600 hover:text-red-800 font-medium"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
+                {newEvent.candidates.map((c, i) => (
+                  <div
+                    key={i}
+                    className="flex justify-between mt-3 bg-white p-3 rounded-lg border"
+                  >
+                    <p>
+                      {c.name} ({c.partyName})
+                    </p>
+                    <button
+                      onClick={() => handleRemoveCandidate(i)}
+                      className="text-red-600"
+                    >
+                      Remove
+                    </button>
                   </div>
-                )}
+                ))}
               </div>
 
               <div className="flex gap-4">
@@ -343,18 +293,24 @@ export default function AdminDashboard() {
             <div>
               <h2 className="text-2xl font-bold mb-6">Event History</h2>
 
-              {events.map((event, idx) => (
-                <div
-                  key={idx}
-                  className="p-4 bg-gray-50 border rounded-lg mb-4"
-                >
-                  <h3 className="font-semibold">{event.title}</h3>
-                  <p className="text-sm text-gray-500">
-                    {new Date(event.startAt).toLocaleString()} →{" "}
-                    {new Date(event.endAt).toLocaleString()}
-                  </p>
-                </div>
-              ))}
+              {adminEventsLoading ? (
+                <p className="text-gray-500">Loading events...</p>
+              ) : adminEvents.length === 0 ? (
+                <p className="text-gray-500">No events created yet</p>
+              ) : (
+                adminEvents.map((event) => (
+                  <div
+                    key={event._id}
+                    className="p-4 bg-gray-50 border rounded-lg mb-4"
+                  >
+                    <h3 className="font-semibold">{event.title}</h3>
+                    <p className="text-sm text-gray-500">
+                      {new Date(event.startAt).toLocaleString()} →{" "}
+                      {new Date(event.endAt).toLocaleString()}
+                    </p>
+                  </div>
+                ))
+              )}
 
               <button
                 onClick={() => setView("main")}

@@ -1,14 +1,9 @@
 const Admin = require('../models/Admin.js');
-// const Voter = require('../models/Voter.js')
 const Event = require("../models/Event");
 const Candidate = require("../models/Candidate");
 const { createCandidate } = require('./candidateController.js');
-
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-// const verificationCode = require('../OTP_verification/verificationCodeGenerator.js');
-// const { sendVerificationEamil,sendWelcomeEmail } = require('../OTP_verification/email.js');
-
 const createAdmin = async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -206,5 +201,21 @@ const createEvent = async (req, res) => {
     });
   }
 };
+const onlyAdminEvents = async (req, res) => {
+    try {
+        // console.log("Fetching events for admin with ID:", req.user.id);
+        const { id } = req.params;
+        if (id !== req.user.id) {
+            return res.status(403).json({ message: "Access denied" });
+        }   
+        const events = await Event.find({ createdBy: id }).populate('candidates');
+        // console.log("Fetched Events for Admin:", events);
+        return res.status(200).json({ success: true, events });
+    } catch (error) {
+        console.error("Fetch Admin Events Error:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};      
 
-module.exports = { createAdmin, loginAdmin, logoutAdmin, deleteAdmin, profileAdmin, createEvent}
+
+module.exports = { createAdmin, loginAdmin, logoutAdmin, deleteAdmin, profileAdmin, createEvent, onlyAdminEvents };

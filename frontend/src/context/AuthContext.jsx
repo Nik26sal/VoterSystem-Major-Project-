@@ -7,6 +7,8 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [adminEvents, setAdminEvents] = useState([]);
+  const [adminEventsLoading, setAdminEventsLoading] = useState(false);
   // const [allEventsData, setAllEventsData] = useState([]);
 
   useEffect(() => {
@@ -100,6 +102,25 @@ export const AuthProvider = ({ children }) => {
     // setAllEventsData(data.events);
     return data.events;
   }
+  const getAdminEvents = async (adminId) => {
+    try {
+      setAdminEventsLoading(true);
+      const res = await api.get(
+        `/admin/event/${adminId}`,
+        { withCredentials: true }
+      );
+
+      if (res.data?.success) {
+        setAdminEvents(res.data.events);
+        return res.data.events;
+      }
+    } catch (error) {
+      console.error("Get Admin Events Error:", error);
+      return [];
+    } finally {
+      setAdminEventsLoading(false);
+    }
+  };
 
   return (
     <AuthContext.Provider
@@ -114,6 +135,9 @@ export const AuthProvider = ({ children }) => {
         profileFetch,
         createEvent,
         allEvents,
+        adminEvents,
+        adminEventsLoading,
+        getAdminEvents,
         // createCandidate
       }}
     >
