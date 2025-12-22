@@ -9,6 +9,6 @@ router.post('/emailverify',verifyEmail)
 router.delete('/deleteVoter',deleteVoter);
 router.post('/logoutVoter',logoutVoter);
 router.get('/profileVoter/:id',authMiddleware,profileVoter);
-router.put('/changePassword',changePassword)
+router.put('/changePassword',authMiddleware,changePassword)
 
 module.exports = router;

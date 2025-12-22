@@ -4,8 +4,10 @@ import useAuth from "../hooks/useAuth";
 
 export default function Passwordchange() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [form, setForm] = useState({ currentPassword: "", newPassword: "" });
   const [loading, setLoading] = useState(false);
+  
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const {changePassword} = useAuth();
@@ -22,8 +24,8 @@ export default function Passwordchange() {
      const res = await changePassword(form.currentPassword, form.newPassword)
       if (!res.statusText === "OK") throw new Error("Failed to change password");
 
-      setSuccess("Password updated successfully!");
-      setTimeout(() => navigate("/login"), 1500);
+      setSuccess("Password updated successfully! Redirecting to profile...");
+      setTimeout(() => navigate(`/profile/${user.id}`), 1500);
     } catch (err) {
       setError(err.message || "An error occurred");
     } finally {
