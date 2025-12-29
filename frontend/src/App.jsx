@@ -12,10 +12,12 @@ import AdminDashboard from './Components/AdminDashboard'
 import VoterDashboard from './Components/VoterDashboard'
 import EventHistory from './pages/EventHistory'
 import OTP from './pages/OTP'
+import { Toaster } from 'react-hot-toast'
 const App = () => {
   return (
     <div>
-      <AuthProvider>  
+      <AuthProvider>
+      <Toaster position="center-top" reverseOrder={false} />  
       <Navbar/>
       <Routes> 
         <Route path="/" element={<Home/>}/>

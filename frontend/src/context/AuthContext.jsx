@@ -1,4 +1,5 @@
 import { createContext, useEffect, useState } from "react";
+import toast from 'react-hot-toast';
 import api from "../api/api";
 
 const AuthContext = createContext(null);
@@ -36,9 +37,11 @@ export const AuthProvider = ({ children }) => {
       );
 
       setUser(data.user);
+      toast.success("Login successful");
       return data.user;
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      // setError(err.response?.data?.message || "Login failed");
+      toast.error(err.response?.data?.message || "Login failed");
       throw err;
     } finally {
       setLoading(false);
@@ -70,6 +73,7 @@ export const AuthProvider = ({ children }) => {
       await api.post(
         `/${user.role === "voter" ? "voter/logoutVoter" : "admin/logoutAdmin"}`
       );
+      toast.success("Logout successful");
     } finally {
       setUser(null);
     }
@@ -129,9 +133,11 @@ export const AuthProvider = ({ children }) => {
         oldPassword:currentPassword,
         newPassword
       })
+      toast.success("Password changed successfully redirecting to profile...");
       return res;
     } catch (error) {
       console.log(error);
+      toast.error(error.response?.data?.message || "Password change failed");
       return error;
     }
   }

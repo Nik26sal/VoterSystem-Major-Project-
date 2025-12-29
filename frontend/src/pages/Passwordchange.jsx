@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate} from "react-router-dom";
 import useAuth from "../hooks/useAuth";
+import toast from 'react-hot-toast';
 
 export default function Passwordchange() {
   const navigate = useNavigate();
@@ -17,6 +18,10 @@ export default function Passwordchange() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if(form.newPassword.length < 6) {
+      toast.error("New password must be at least 6 characters long");
+      return;
+    }
     setError("");
     setSuccess("");
     setLoading(true);
@@ -61,8 +66,8 @@ export default function Passwordchange() {
             placeholder="Enter new password"
           />
 
-          {error && <div className="text-red-500 mb-3">{error}</div>}
-          {success && <div className="text-green-600 mb-3">{success}</div>}
+          {/* {error && <div className="text-red-500 mb-3">{error}</div>} */}
+          {/* {success && <div className="text-green-600 mb-3">{success}</div>} */}
 
           <button
             type="submit"

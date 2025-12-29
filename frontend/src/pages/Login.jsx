@@ -66,7 +66,7 @@ export default function Login() {
             className="w-full p-2 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
 
-          {error && <div className="text-red-500 mb-3">{error}</div>}
+          {/* {error && <div className="text-red-500 mb-3">{error}</div>} */}
 
           <button
             type="submit"

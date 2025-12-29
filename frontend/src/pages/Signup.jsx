@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
+import toast from 'react-hot-toast';
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -18,6 +19,10 @@ export default function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      if(form.password.length < 6) {
+        toast.error("Password must be at least 6 characters long");
+        return;
+      }
       const response = await signup(form);
       console.log(response); 
       navigate("/otp_verify"); 

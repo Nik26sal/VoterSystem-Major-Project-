@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import toast from 'react-hot-toast';
 import api from "../api/api";
 
 const Event = () => {
@@ -16,7 +17,7 @@ const Event = () => {
         setEvent(res.data.event); 
       } catch (err) {
         console.error(err);
-        setError("Failed to load event");
+        toast.error("not authorized to view this event");
       } finally {
         setLoading(false);
       }
@@ -27,7 +28,7 @@ const Event = () => {
 
   /* ================= VOTE HANDLER ================= */
   const handleVote = (candidateId) => {
-    alert(`You voted for candidate ID: ${candidateId}`);
+    toast.success(`You voted for candidate ID: ${candidateId}`);
   };
 
   /* ================= UI STATES ================= */
