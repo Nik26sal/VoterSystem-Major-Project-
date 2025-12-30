@@ -172,4 +172,124 @@ const Welcome_Email_Template = `
   </html>
 `;
 
-module.exports = {Verification_Email_Template, Welcome_Email_Template}
+const Admin_Creation_Email_Template = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoterX Admin Account Created</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 30px auto;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 1px solid #ddd;
+        }
+        .header {
+            background-color: #0d6efd;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 26px;
+            font-weight: bold;
+        }
+        .content {
+            padding: 25px;
+            line-height: 1.8;
+        }
+        .credentials {
+            background: #f1f7ff;
+            border: 1px dashed #0d6efd;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .credentials p {
+            margin: 8px 0;
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        .footer {
+            background-color: #f4f4f4;
+            padding: 15px;
+            text-align: center;
+            color: #777;
+            font-size: 12px;
+            border-top: 1px solid #ddd;
+        }
+        .warning {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        p {
+            margin: 0 0 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            VoterX Admin Access Granted
+        </div>
+        <div class="content">
+            <p>Hello,</p>
+
+            <p>
+                We are pleased to inform you that an <strong>Admin account</strong> 
+                has been successfully created for your institute on 
+                <strong>VoterX – Blockchain-Based Voting System</strong>.
+            </p>
+
+            <p>
+                <strong>Institute Name:</strong> {instituteName}
+            </p>
+
+            <div class="credentials">
+                <p>Admin Email: {adminEmail}</p>
+                <p>Temporary Password: {password}</p>
+            </div>
+
+            <p class="warning">
+                ⚠️ Please change your password immediately after your first login 
+                to ensure account security.
+            </p>
+
+            <p>
+                You can now log in and manage elections, voters, and results securely
+                using our blockchain-powered platform.
+            </p>
+
+            <p>
+                If you did not request this account or have any concerns, please
+                contact the VoterX support team immediately.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>
+                &copy; ${new Date().getFullYear()} VoterX. All rights reserved.
+            </p>
+            <p>
+                Blockchain-Powered Secure Voting System
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+`;
+
+
+module.exports = {Verification_Email_Template, Welcome_Email_Template,Admin_Creation_Email_Template}

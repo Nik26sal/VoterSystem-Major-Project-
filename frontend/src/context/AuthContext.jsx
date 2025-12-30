@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const signup = async ({ name, email, password }) => {
+  const signup = async ({ name, email, password ,institute}) => {
     setLoading(true);
     setError(null);
 
@@ -57,6 +57,7 @@ export const AuthProvider = ({ children }) => {
         name,
         email,
         password,
+        institute
       });
       return data;
     } catch (err) {

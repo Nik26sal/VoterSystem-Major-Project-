@@ -3,6 +3,7 @@ const Event = require("../models/Event");
 const Candidate = require("../models/Candidate");
 const { createCandidate } = require('./candidateController.js');
 const bcrypt = require('bcrypt');
+const {sendAdminCreation} = require('../OTP_verification/email.js')
 const jwt = require('jsonwebtoken');
 const createAdmin = async (req, res) => {
     try {
@@ -14,9 +15,8 @@ const createAdmin = async (req, res) => {
         if (existing) {
             return res.status(401).json({ message: "This user already exists." });
         }
-        // const Code = verificationCode();
         const hashedPassword = await bcrypt.hash(password, 10);
-        await Admin.create(
+        const newAdmin = await Admin.create(
             {
                 name,
                 email,
@@ -24,10 +24,9 @@ const createAdmin = async (req, res) => {
             }
         );
 
-        // const send = await sendVerificationEamil(email, Code);
-        // if (!send) {
-        //     return res.status(500).json({ message: 'Something went wrong. Please try again later.' });
-        // }
+        if(newAdmin){
+          sendAdminCreation(name,email,password)
+        }
         return res.status(201).json({
             message: `Admin created successfully`,
         });
@@ -36,28 +35,6 @@ const createAdmin = async (req, res) => {
         return res.status(500).json({ message: 'Internal Server Error' });
     }
 };
-
-
-// const verifyEmail = async (req, res) => {
-//     const { code } = req.body
-//     try {
-//         const user = await Admin.findOne({
-//             verificationCode: code,
-//         })
-//         if (!user) {
-//             return res.status(400).json({ message: "Inavlid or Expired Code" })
-//         }
-
-//         user.isVerified = true;
-//         await user.save()
-//         await sendWelcomeEmail(user.email, user.name)
-//         return res.status(200).json({ success: true, message: "Email Verifed Successfully",Admin:user })
-
-//     } catch (error) {
-//         console.log(error)
-//         return res.status(400).json({ success: false, message: "internal server error" })
-//     }
-// }
 
 const loginAdmin = async (req, res) => {
     try {

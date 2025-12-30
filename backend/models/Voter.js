@@ -6,9 +6,13 @@ const voterSchema = new mongoose.Schema({
   password: { type: String, required: true },
   banned: { type: Boolean, default: false },
   role: { type: String, default: "voter" },
-  verificationCode:{type:Number},
-  isVerified:{type:Boolean,default:false},
-}, { timestamps: true }); 
+  institute: {
+    type: String,
+    required: true
+  },
+  verificationCode: { type: Number },
+  isVerified: { type: Boolean, default: false },
+}, { timestamps: true });
 
 const voter = mongoose.model("Voter", voterSchema);
 module.exports = voter;

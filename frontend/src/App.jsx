@@ -13,6 +13,9 @@ import VoterDashboard from './Components/VoterDashboard'
 import EventHistory from './pages/EventHistory'
 import OTP from './pages/OTP'
 import { Toaster } from 'react-hot-toast'
+import Landing from './Components/landing'
+import Contact from './Components/contact'
+import AboutUS from './Components/AboutUs'
 const App = () => {
   return (
     <div>
@@ -20,7 +23,10 @@ const App = () => {
       <Toaster position="center-top" reverseOrder={false} />  
       <Navbar/>
       <Routes> 
-        <Route path="/" element={<Home/>}/>
+        <Route path="/" element={<Landing/>}/>
+        <Route path="/contact" element={<Contact/>}/>
+        <Route path='/about_us' element={<AboutUS/>}/>
+        <Route path="/home" element={<Home/>}/>
         <Route path="/login" element={<Login/>}/>
         <Route path="/otp_verify" element={<OTP/>}/>
         <Route path="/signup" element={<Signup/>}/>

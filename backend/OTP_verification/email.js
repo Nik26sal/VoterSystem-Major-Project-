@@ -1,4 +1,4 @@
-const { Verification_Email_Template, Welcome_Email_Template } = require("./email_template.js");
+const { Verification_Email_Template, Welcome_Email_Template,Admin_Creation_Email_Template } = require("./email_template.js");
 const {transporter} = require('./email_config.js')
 const sendVerificationEamil=async(email,verificationCode)=>{
     try {
@@ -33,5 +33,25 @@ const sendWelcomeEmail=async(email,name)=>{
     }
 }
 
+const sendAdminCreation = async (instituteName, email, password) => {
+  try {
+    const response = await transporter.sendMail({
+      from: `${process.env.EMAIL}`,
+      to: email,
+      subject: "VoterX Admin Account Created",
+      html: Admin_Creation_Email_Template
+        .replace("{instituteName}", instituteName)
+        .replace("{adminEmail}", email)
+        .replace("{password}", password),
+    });
+    console.log("Admin creation email sent successfully", response);
+    return true;
 
-module.exports = {sendVerificationEamil, sendWelcomeEmail};
+  } catch (error) {
+    console.error("Admin creation email error:", error);
+    return false;
+  }
+};
+
+
+module.exports = {sendVerificationEamil, sendWelcomeEmail,sendAdminCreation};

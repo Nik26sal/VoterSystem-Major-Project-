@@ -11,6 +11,7 @@ export default function Signup() {
     name: "",
     email: "",
     password: "",
+    institute:""
   });
 
   const handleChange = (e) =>
@@ -63,6 +64,16 @@ export default function Signup() {
             value={form.password}
             onChange={handleChange}
             type="password"
+            required
+            className="w-full p-2 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+          <label className="block mb-2 font-medium">Institute</label>
+          <input
+            name="institute"
+            value={form.institute}
+            onChange={handleChange}
+            type="text"
             required
             className="w-full p-2 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />

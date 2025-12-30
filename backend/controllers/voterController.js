@@ -1,4 +1,5 @@
 const Voter = require('../models/Voter');
+const Admin = require('../models/Admin.js')
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const verificationCode = require('../OTP_verification/verificationCodeGenerator.js');
@@ -6,11 +7,15 @@ const { sendVerificationEamil,sendWelcomeEmail } = require('../OTP_verification/
 
 const createVoter = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password) {
+    const { name, email, password,institute} = req.body;
+    console.log(institute)
+    if (!name || !email || !password || !institute) {
       return res.status(400).json({ message: "All fields are required" });
     }
-
+    const existedAdmin = await Admin.find({name:institute});
+    if(!existedAdmin){
+      return res.status(400).json({ message: "This institue Not exists" });
+    }
     const existingVoter = await Voter.findOne({ email });
     if (existingVoter) {
       if (!existing.isVerified) {
@@ -26,6 +31,7 @@ const createVoter = async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      institute,
       verificationCode: Code,
     });
 
