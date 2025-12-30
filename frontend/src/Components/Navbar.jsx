@@ -33,7 +33,7 @@ export default function Navbar() {
           </h1>
 
           <div className="hidden md:flex gap-6 items-center">
-            <button onClick={() => navigate("/")} className="hover:text-blue-600">
+            <button onClick={() => navigate("/home")} className="hover:text-blue-600">
               Events
             </button>
 
