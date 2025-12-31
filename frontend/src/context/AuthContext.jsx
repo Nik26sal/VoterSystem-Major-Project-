@@ -99,6 +99,7 @@ export const AuthProvider = ({ children }) => {
   const createEvent = async (eventData) => {
     console.log("Creating event with data:", eventData);
     const { data } = await api.post("/admin/createEvent", eventData);
+    
     return data;
   };
 

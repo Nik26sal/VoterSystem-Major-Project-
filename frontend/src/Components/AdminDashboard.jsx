@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Calendar, PlusCircle, History } from "lucide-react";
 import useAuth from "../hooks/useAuth";
+import toast from "react-hot-toast";
 
 export default function AdminDashboard() {
   const { user, createEvent, adminEvents, adminEventsLoading, getAdminEvents } =
@@ -38,26 +39,40 @@ export default function AdminDashboard() {
 
   /* ================= ADD CANDIDATE ================= */
   const handleAddCandidate = () => {
-    const { name, email, age, partyName } = candidate;
+  const { name, email, age, partyName } = candidate;
 
-    if (!name || !email || !age || !partyName) {
-      alert("Name, Email, Age and Party Name are required");
-      return;
-    }
+  if (!name || !email || !age || !partyName) {
+    toast.error("Name, Email, Age and Party Name are required");
+    return;
+  }
 
-    setNewEvent((prev) => ({
-      ...prev,
-      candidates: [...prev.candidates, candidate],
-    }));
+  const ageNum = Number(age);
+  if (ageNum <= 16 || ageNum >= 100) {
+    toast.error("Candidate age must be greater than 16 and less than 100");
+    return;
+  }
 
-    setCandidate({
-      name: "",
-      email: "",
-      age: "",
-      partyName: "",
-      description: "",
-    });
-  };
+  if (countWords(partyName) > 10) {
+    toast.error("Party name cannot exceed 10 words");
+    return;
+  }
+
+  setNewEvent((prev) => ({
+    ...prev,
+    candidates: [...prev.candidates, { ...candidate, age: ageNum }],
+  }));
+
+  setCandidate({
+    name: "",
+    email: "",
+    age: "",
+    partyName: "",
+    description: "",
+  });
+};
+const countWords = (text = "") =>
+  text.trim().split(/\s+/).filter(Boolean).length;
+
 
   /* ================= REMOVE CANDIDATE ================= */
   const handleRemoveCandidate = (index) => {
@@ -68,52 +83,89 @@ export default function AdminDashboard() {
   };
 
   /* ================= CREATE EVENT ================= */
-  const handleCreateEvent = async () => {
-    if (!newEvent.title || !newEvent.startAt || !newEvent.endAt) {
-      alert("Title, Start time and End time are required");
-      return;
-    }
+const handleCreateEvent = async () => {
+  const { title, subtitle, description, startAt, endAt, candidates } =
+    newEvent;
 
-    const data = {
-      title: newEvent.title,
-      subtitle: newEvent.subtitle,
-      description: newEvent.description,
-      startAt: new Date(newEvent.startAt),
-      endAt: new Date(newEvent.endAt),
-      allowedEmails: newEvent.allowedEmails
-        .split(",")
-        .map((e) => e.trim())
-        .filter(Boolean),
-      whitelistVoters: newEvent.whitelistVoters
-        .split(",")
-        .map((v) => v.trim())
-        .filter(Boolean),
-      candidates: newEvent.candidates,
-      createdBy: user.id,
-    };
+  if (!title || !startAt || !endAt) {
+    toast.error("Title, Start time and End time are required");
+    return;
+  }
 
-    try {
-      await createEvent(data);
-      await getAdminEvents(user.id);
+  if (countWords(title) > 10) {
+    toast.error("Title cannot exceed 10 words");
+    return;
+  }
 
-      setNewEvent({
-        title: "",
-        subtitle: "",
-        description: "",
-        startAt: "",
-        endAt: "",
-        allowedEmails: "",
-        whitelistVoters: "",
-        candidates: [],
-      });
+  if (subtitle && countWords(subtitle) > 20) {
+    toast.error("Subtitle cannot exceed 20 words");
+    return;
+  }
 
-      setView("main");
-      alert("Event created successfully!");
-    } catch (err) {
-      console.error(err);
-      alert("Failed to create event");
-    }
+  if (description && countWords(description) > 100) {
+    toast.error("Description cannot exceed 100 words");
+    return;
+  }
+
+  const now = new Date();
+  const startDate = new Date(startAt);
+  const endDate = new Date(endAt);
+
+  if (startDate < now) {
+    toast.error("Starting date & time cannot be in the past");
+    return;
+  }
+
+  if (endDate < startDate) {
+    toast.error("Ending date & time cannot be before starting date");
+    return;
+  }
+
+  if (candidates.length === 0) {
+    toast.error("At least one candidate is required");
+    return;
+  }
+
+  const data = {
+    title,
+    subtitle,
+    description,
+    startAt: startDate,
+    endAt: endDate,
+    allowedEmails: newEvent.allowedEmails
+      .split(",")
+      .map((e) => e.trim())
+      .filter(Boolean),
+    whitelistVoters: newEvent.whitelistVoters
+      .split(",")
+      .map((v) => v.trim())
+      .filter(Boolean),
+    candidates,
+    createdBy: user.id,
   };
+
+  try {
+    await createEvent(data);
+    await getAdminEvents(user.id);
+
+    setNewEvent({
+      title: "",
+      subtitle: "",
+      description: "",
+      startAt: "",
+      endAt: "",
+      allowedEmails: "",
+      whitelistVoters: "",
+      candidates: [],
+    });
+
+    setView("main");
+    toast.success("Event created successfully!");
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to create event");
+  }
+};
 
   return (
     <div className="pt-20 min-h-screen bg-gray-50">
