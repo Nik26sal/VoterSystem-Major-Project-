@@ -7,6 +7,7 @@ const voterRoutes = require('./routes/voterRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const voteRoutes = require("./routes/voteRoutes");
+const resultRoutes = require("./routes/resultRoutes");
 const database = require('./Database/database')
 const app = express();
 const PORT = process.env.PORT;
@@ -43,6 +44,7 @@ app.use('/api/admin',adminRoutes)
 app.use('/api/voter',voterRoutes)
 app.use('/api/event',eventRoutes)
 app.use("/api", voteRoutes);
+app.use("/api/results", resultRoutes);
 
 app.listen(PORT, () => {
 	console.log(`Server listening on port ${PORT}`)

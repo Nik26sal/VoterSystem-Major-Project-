@@ -1,5 +1,6 @@
 import { Route,Routes } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import AdminResults from "./pages/AdminResults";
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
@@ -38,6 +39,7 @@ const App = () => {
         <Route path="/dashboard/AdminDashboard" element={<AdminDashboard />} />
         <Route path="/dashboard/VoterDashboard" element={<VoterDashboard />} />
         <Route path="/eventHistory/:id" element={<EventHistory/>} />
+        <Route path="/admin/results/:eventId" element={<AdminResults />} />
       </Routes>
       </AuthProvider>
     </div>

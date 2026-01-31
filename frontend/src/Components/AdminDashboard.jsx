@@ -4,9 +4,11 @@ import useAuth from "../hooks/useAuth";
 import toast from "react-hot-toast";
 import { ethers } from "ethers";
 import { Wallet } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const [walletAddress, setWalletAddress] = useState("0x0000000000000000000000see3434jnf434j");
   const [walletConnected, setWalletConnected] = useState(true);
   const { user, createEvent, adminEvents, adminEventsLoading, getAdminEvents } =
@@ -401,15 +403,16 @@ const connectWallet = async () => {
               ) : (
                 adminEvents.map((event) => (
                   <div
-                    key={event._id}
-                    className="p-4 bg-gray-50 border rounded-lg mb-4"
-                  >
-                    <h3 className="font-semibold">{event.title}</h3>
-                    <p className="text-sm text-gray-500">
-                      {new Date(event.startAt).toLocaleString()} →{" "}
-                      {new Date(event.endAt).toLocaleString()}
-                    </p>
-                  </div>
+                  key={event._id}
+                  onClick={() => navigate(`/admin/results/${event._id}`)}
+                  className="p-4 bg-gray-50 border rounded-lg mb-4 cursor-pointer hover:bg-gray-100"
+                >
+                  <h3 className="font-semibold">{event.title}</h3>
+                  <p className="text-sm text-gray-500">
+                    {new Date(event.startAt).toLocaleString()} →{" "}
+                    {new Date(event.endAt).toLocaleString()}
+                  </p>
+                </div>
                 ))
               )}
 

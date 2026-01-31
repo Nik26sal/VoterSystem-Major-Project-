@@ -18,8 +18,13 @@ async function castVoteOnChain(eventId, candidateId, voterAddress) {
 }
 
 
-async function getVotes(candidateId) {
-  return await contract.getVotes(candidateId);
+// async function getVotes(candidateId) {
+//   return await contract.getVotes(candidateId);
+// }
+
+async function getVotesFromChain(eventId, candidateId) {
+  const votes = await contract.getVotes(eventId, candidateId);
+  return Number(votes);
 }
 
-module.exports = { castVoteOnChain, getVotes };
+module.exports = { castVoteOnChain, getVotesFromChain };
