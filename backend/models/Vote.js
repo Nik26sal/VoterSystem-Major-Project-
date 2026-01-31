@@ -22,8 +22,10 @@ const voteSchema = new mongoose.Schema({
   castAt: {
     type: Date,
     required: true
+  },
+  txHash: {
+    type: String // blockchain proof
   }
-
 });
 
 const Vote = mongoose.model("Vote", voteSchema);

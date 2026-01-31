@@ -30,8 +30,11 @@ const eventSchema = new mongoose.Schema({
 
   startAt: { type: Date, required: true },
 
-  endAt: { type: Date, required: true }
-
+  endAt: { type: Date, required: true },
+  
+  blockchainContract: {
+      type: String // deployed smart contract address
+  }
 });
 
 const Event = mongoose.model("Event", eventSchema);
