@@ -7,8 +7,8 @@ import { Wallet } from "lucide-react";
 
 
 export default function AdminDashboard() {
-  const [walletAddress, setWalletAddress] = useState("");
-  const [walletConnected, setWalletConnected] = useState(false);
+  const [walletAddress, setWalletAddress] = useState("0x0000000000000000000000see3434jnf434j");
+  const [walletConnected, setWalletConnected] = useState(true);
   const { user, createEvent, adminEvents, adminEventsLoading, getAdminEvents } =
     useAuth();
 

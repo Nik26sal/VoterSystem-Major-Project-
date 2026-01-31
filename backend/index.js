@@ -6,6 +6,7 @@ const cors = require('cors');
 const voterRoutes = require('./routes/voterRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const eventRoutes = require('./routes/eventRoutes');
+const voteRoutes = require("./routes/voteRoutes");
 const database = require('./Database/database')
 const app = express();
 const PORT = process.env.PORT;
@@ -41,6 +42,7 @@ app.get('/api/checkAuth',authMiddleware,async (req,res)=>{
 app.use('/api/admin',adminRoutes)
 app.use('/api/voter',voterRoutes)
 app.use('/api/event',eventRoutes)
+app.use("/api", voteRoutes);
 
 app.listen(PORT, () => {
 	console.log(`Server listening on port ${PORT}`)

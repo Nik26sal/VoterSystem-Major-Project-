@@ -35,8 +35,8 @@ export const AuthProvider = ({ children }) => {
         `/${role === "voter" ? "voter/loginVoter" : "admin/loginAdmin"}`,
         { email, password }
       );
-
       setUser(data.user);
+      localStorage.setItem("userId", data.user.id);
       toast.success("Login successful");
       return data.user;
     } catch (err) {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
 import api from "../api/api";
 
 const Event = () => {
@@ -8,16 +8,18 @@ const Event = () => {
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [voting, setVoting] = useState(null);
 
   /* ================= FETCH EVENT ================= */
   useEffect(() => {
     const fetchEvent = async () => {
       try {
         const res = await api.get(`/event/${id}`);
-        setEvent(res.data.event); 
+        setEvent(res.data.event);
       } catch (err) {
         console.error(err);
-        toast.error("not authorized to view this event");
+        toast.error("Not authorized to view this event");
+        setError("Failed to load event");
       } finally {
         setLoading(false);
       }
@@ -27,8 +29,33 @@ const Event = () => {
   }, [id]);
 
   /* ================= VOTE HANDLER ================= */
-  const handleVote = (candidateId) => {
-    toast.success(`You voted for candidate ID: ${candidateId}`);
+  const handleVote = async (candidateId) => {
+    try {
+      setVoting(candidateId);
+
+      const voterId = localStorage.getItem("userId"); // saved at login
+
+      if (!voterId) {
+        toast.error("Please login first");
+        return;
+      }
+      console.log({ voterId, eventId: id, candidateMongoId: candidateId });
+      const res = await api.post("/vote", {
+        voterId,
+        eventId: id,
+        candidateMongoId: candidateId,
+      });
+
+      toast.success("Vote recorded on blockchain!");
+
+      console.log("Transaction Hash:", res.data.txHash);
+
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Voting failed");
+    } finally {
+      setVoting(null);
+    }
   };
 
   /* ================= UI STATES ================= */
@@ -93,7 +120,7 @@ const Event = () => {
             </div>
 
             <button
-              disabled={event.status !== "ongoing"}
+              disabled={event.status !== "ongoing" || voting === candidate._id}
               onClick={() => handleVote(candidate._id)}
               className={`px-4 py-2 rounded-md text-white ${
                 event.status === "ongoing"
@@ -101,7 +128,7 @@ const Event = () => {
                   : "bg-gray-400 cursor-not-allowed"
               }`}
             >
-              Vote
+              {voting === candidate._id ? "Submitting..." : "Vote"}
             </button>
           </div>
         ))}

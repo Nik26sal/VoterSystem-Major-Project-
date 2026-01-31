@@ -107,7 +107,6 @@ const profileAdmin = async (req, res) => {
     }
 }
 
-
 const createEvent = async (req, res) => {
   try {
     const {
@@ -118,54 +117,61 @@ const createEvent = async (req, res) => {
       endAt,
       allowedEmails,
       whitelistVoters,
-      candidates,
-      createdBy
+      candidates
     } = req.body;
-    if (!title || !startAt || !endAt || !createdBy) {
+
+    const createdBy = req.user.id; // ⭐ secure source
+
+    if (!title || !startAt || !endAt) {
       return res.status(400).json({
-        message: "Title, startAt, endAt and createdBy are required"
+        message: "Title, startAt and endAt are required"
       });
     }
+
     const startDate = new Date(startAt);
     const endDate = new Date(endAt);
 
     if (startDate >= endDate) {
-      return res.status(400).json({
-        message: "startAt must be before endAt"
-      });
+      return res.status(400).json({ message: "startAt must be before endAt" });
     }
-    
+
     const now = new Date();
     let status = "upcoming";
-    
-    if (now >= startDate && now <= endDate) {
-        status = "ongoing";
-    } else if (now > endDate) {
-        status = "closed";
-    }
-    const candidateDocs = await Promise.all(
-      candidates.map(async (candidate) => {
-        return await createCandidate(candidate);
-      })
-    );
-    const candidateIds = candidateDocs.map((c) => c._id);
-    const newEvent = Event.create({
+    if (now >= startDate && now <= endDate) status = "ongoing";
+    else if (now > endDate) status = "closed";
+    const eventCount = await Event.countDocuments();
+    const blockchainEventId = eventCount;
+    // 1️⃣ Create event first
+    const newEvent = await Event.create({
       title,
       subtitle,
       description,
       startAt: startDate,
       endAt: endDate,
       status,
-      candidates: candidateIds,
       allowedEmails: allowedEmails || [],
       whitelistVoters: whitelistVoters || [],
-      createdBy
+      createdBy,
+      blockchainEventId
     });
-    await Candidate.updateMany(
-      { _id: { $in: candidateIds } },
-      { $set: { event: newEvent._id } }
+
+    // 2️⃣ Create candidates with blockchainId + eventId
+    const candidateDocs = await Promise.all(
+      candidates.map((candidate, index) =>
+        createCandidate({
+          ...candidate,
+          blockchainId: index,
+          event: newEvent._id  // ⭐ store event reference immediately
+        })
+      )
     );
-    // const savedEvent = await event.save();
+
+    const candidateIds = candidateDocs.map(c => c._id);
+
+    // 3️⃣ Update event with candidate list
+    newEvent.candidates = candidateIds;
+    await newEvent.save();
+
     return res.status(201).json({
       message: "Event created successfully",
       event: newEvent
@@ -173,11 +179,11 @@ const createEvent = async (req, res) => {
 
   } catch (error) {
     console.error("Create Event Error:", error);
-    return res.status(500).json({
-      message: "Internal Server Error"
-    });
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+
 const onlyAdminEvents = async (req, res) => {
     try {
         // console.log("Fetching events for admin with ID:", req.user.id);

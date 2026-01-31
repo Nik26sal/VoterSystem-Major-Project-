@@ -21,12 +21,13 @@ const voteSchema = new mongoose.Schema({
 
   castAt: {
     type: Date,
-    required: true
+    default: Date.now  // ⭐ auto timestamp
   },
   txHash: {
     type: String // blockchain proof
   }
 });
+voteSchema.index({ voter: 1, event: 1 }, { unique: true });
 
 const Vote = mongoose.model("Vote", voteSchema);
 module.exports = Vote

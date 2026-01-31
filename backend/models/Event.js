@@ -34,7 +34,8 @@ const eventSchema = new mongoose.Schema({
   
   blockchainContract: {
       type: String // deployed smart contract address
-  }
+  },
+  blockchainEventId: { type: Number, required: true }
 });
 
 const Event = mongoose.model("Event", eventSchema);
