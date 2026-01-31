@@ -2,8 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Calendar, PlusCircle, History } from "lucide-react";
 import useAuth from "../hooks/useAuth";
 import toast from "react-hot-toast";
+import { ethers } from "ethers";
+import { Wallet } from "lucide-react";
+
 
 export default function AdminDashboard() {
+  const [walletAddress, setWalletAddress] = useState("");
+  const [walletConnected, setWalletConnected] = useState(false);
   const { user, createEvent, adminEvents, adminEventsLoading, getAdminEvents } =
     useAuth();
 
@@ -84,6 +89,11 @@ const countWords = (text = "") =>
 
   /* ================= CREATE EVENT ================= */
 const handleCreateEvent = async () => {
+  if (!walletConnected) {
+    toast.error("Please connect admin wallet first");
+    return;
+  }
+
   const { title, subtitle, description, startAt, endAt, candidates } =
     newEvent;
 
@@ -167,6 +177,27 @@ const handleCreateEvent = async () => {
   }
 };
 
+const connectWallet = async () => {
+  try {
+    if (!window.ethereum) {
+      toast.error("MetaMask not detected");
+      return;
+    }
+
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const accounts = await provider.send("eth_requestAccounts", []);
+
+    setWalletAddress(accounts[0]);
+    setWalletConnected(true);
+
+    toast.success("Admin wallet connected");
+  } catch (err) {
+    console.error(err);
+    toast.error("Wallet connection failed");
+  }
+};
+
+
   return (
     <div className="pt-20 min-h-screen bg-gray-50">
       <div className="max-w-5xl mx-auto px-6 py-12">
@@ -176,6 +207,24 @@ const handleCreateEvent = async () => {
           {/* ================= MAIN ================= */}
           {view === "main" && (
             <>
+            {/* <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1> */}
+            <div className="flex items-center justify-between mb-6">
+            {!walletConnected ? (
+              <button
+                onClick={connectWallet}
+                className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
+              >
+                <Wallet className="w-5 h-5" />
+                Connect Admin Wallet
+              </button>
+            ) : (
+              <div className="bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm">
+                Wallet Connected:{" "}
+                {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+              </div>
+            )}
+          </div>
+
               <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg mb-8">
                 <div className="bg-blue-100 p-3 rounded-full">
                   <Calendar className="w-6 h-6 text-blue-600" />
