@@ -1,7 +1,7 @@
 const Vote = require("../models/Vote");
 const Voter = require("../models/Voter");
 const Candidate = require("../models/Candidate");
-const Event = require("../models/Event"); // ⭐ MISSING
+const Event = require("../models/Event"); 
 const { castVoteOnChain } = require("../services/blockchainService");
 const { ethers } = require("ethers");
 
@@ -20,7 +20,7 @@ exports.castVote = async (req, res) => {
     if (!voter) return res.status(404).json({ message: "Voter not found" });
     if (voter.banned) return res.status(403).json({ message: "Voter banned" });
 
-    const event = await Event.findById(eventId); // ⭐ GET EVENT
+    const event = await Event.findById(eventId);
     if (!event) return res.status(404).json({ message: "Event not found" });
 
     const candidate = await Candidate.findById(candidateMongoId);
@@ -56,5 +56,25 @@ exports.castVote = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Voting failed" });
+  }
+};
+exports.getMyVotes = async (req, res) => {
+  try {
+    const voterId = req.user.id; 
+
+    const votes = await Vote.find({ voter: voterId })
+      .populate({
+        path: "event",
+        select: "title subtitle status startAt endAt"
+      })
+      .populate({
+        path: "candidate",
+        select: "name partyName"
+      });
+
+    res.json({ votes });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to fetch votes" });
   }
 };

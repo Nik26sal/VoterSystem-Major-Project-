@@ -1,28 +1,31 @@
-import React, { useState } from "react";
-import { Calendar} from "lucide-react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { Calendar } from "lucide-react";
+import useAuth from "../hooks/useAuth";
 
 export default function VoterDashboard() {
-  const [participatedEvents] = useState([
-    {
-      title: "Annual Tech Fest",
-      subtitle: "Innovation & AI",
-      startDate: "2025-03-10",
-      endDate: "2025-03-12",
-    },
-    {
-      title: "Cultural Night",
-      subtitle: "Music & Art",
-      startDate: "2025-02-05",
-      endDate: "2025-02-05",
-    },
-    {
-      title: "Sports Meet 2025",
-      subtitle: "Run for Unity",
-      startDate: "2025-01-15",
-      endDate: "2025-01-16",
-    },
-    
-  ]);
+  const { user } = useAuth();
+  const [votes, setVotes] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  /* ================= FETCH MY VOTES ================= */
+  useEffect(() => {
+    const fetchVotes = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost:5000/api/my-votes",
+          { withCredentials: true } 
+        );
+        setVotes(res.data.votes);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user?.id) fetchVotes();
+  }, [user?.id]);
 
   return (
     <div className="pt-20 min-h-screen bg-gray-50">
@@ -32,6 +35,7 @@ export default function VoterDashboard() {
             Voter Dashboard
           </h1>
 
+          {/* TOTAL PARTICIPATION */}
           <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg mb-8">
             <div className="bg-blue-100 p-3 rounded-full">
               <Calendar className="w-6 h-6 text-blue-600" />
@@ -39,46 +43,84 @@ export default function VoterDashboard() {
             <div>
               <p className="text-sm text-gray-500">Total Events Participated</p>
               <p className="text-2xl font-semibold text-gray-800">
-                {participatedEvents.length}
+                {votes.length}
               </p>
             </div>
           </div>
-          <div className="mt-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">
-              History of Events Voter Participated
-            </h2>
 
-            {participatedEvents.length === 0 ? (
-              <p className="text-gray-500">No participation records found.</p>
-            ) : (
-              <div className="space-y-4">
-                {participatedEvents.map((event, idx) => (
-                  <div
-                    key={idx}
-                    className="p-4 border rounded-lg bg-gray-50 flex flex-col md:flex-row justify-between items-start md:items-center"
-                  >
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-800">
-                        {event.title}
-                      </h3>
-                      <p className="text-sm text-gray-500">{event.subtitle}</p>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {event.startDate} → {event.endDate}
-                      </p>
-                    </div>
-                    <button
-                      className="mt-3 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
-                      onClick={() => alert("Handle event details later")}
-                    >
-                      More Details
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">
+            Voting History
+          </h2>
+
+          {loading ? (
+            <p className="text-gray-500">Loading...</p>
+          ) : votes.length === 0 ? (
+            <p className="text-gray-500">You haven't voted in any events yet.</p>
+          ) : (
+            <div className="space-y-4">
+              {votes.map((vote) => (
+                <EventCard key={vote._id} vote={vote} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
+  );
+}
+
+/* ================= EVENT CARD ================= */
+function EventCard({ vote }) {
+  const event = vote.event;
+  const candidate = vote.candidate;
+
+  return (
+    <div className="p-4 border rounded-lg bg-gray-50 flex flex-col gap-2">
+      <h3 className="text-lg font-semibold text-gray-800">{event.title}</h3>
+      <p className="text-sm text-gray-500">{event.subtitle}</p>
+      <p className="text-sm text-gray-600">
+        {new Date(event.startAt).toLocaleString()} →{" "}
+        {new Date(event.endAt).toLocaleString()}
+      </p>
+
+      <p className="text-green-600 font-medium mt-2">
+        🗳️ You voted: {candidate.name} ({candidate.partyName})
+      </p>
+
+      {event.status === "closed" && (
+        <WinnerDisplay eventId={event._id} />
+      )}
+    </div>
+  );
+}
+
+/* ================= WINNER DISPLAY ================= */
+function WinnerDisplay({ eventId }) {
+  const [winner, setWinner] = useState(null);
+
+  useEffect(() => {
+    const fetchResults = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:5000/api/results/${eventId}`,
+          { withCredentials: true }
+        );
+
+        const sorted = res.data.results.sort((a, b) => b.votes - a.votes);
+        setWinner(sorted[0]);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchResults();
+  }, [eventId]);
+
+  if (!winner) return null;
+
+  return (
+    <p className="text-blue-600 font-semibold">
+      🏆 Winner: {winner.name} ({winner.votes} votes)
+    </p>
   );
 }
